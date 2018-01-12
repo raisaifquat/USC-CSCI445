@@ -61,7 +61,7 @@ class Run:
         self.create.safe()
 
         # move forward
-        forward(5, 0.1)
+        forward(5 * 0.1, 0.1)
 
         # left turn (in place)
         turn_left(2, 0.1)
@@ -76,16 +76,16 @@ class Run:
         wait(2)
 
         # move forward
-        forward(2, 0.1)
+        forward(2 * 0.1, 0.1)
 
         # move forward while turning
         move(0.2, 0.1, 7.5)
 
         # move forward
-        forward(5, 0.1)
+        forward(5 * 0.1, 0.1)
 
         # move backwards
-        backward(5, 0.1)
+        backward(5 * 0.1, 0.1)
 
         # stop
         wait(3)
