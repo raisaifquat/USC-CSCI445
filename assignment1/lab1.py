@@ -26,7 +26,7 @@ class Run:
                 distance: float = 1.0  # in meters
         ) -> None:
             def get_time(distance_: float, speed_: float) -> float:
-                return distance_ / speed_
+                return abs(distance_ / speed_)
 
             if duration is None:
                 duration = get_time(
