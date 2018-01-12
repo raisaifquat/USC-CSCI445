@@ -8,7 +8,10 @@ def mysum2(nums: List[int]) -> int:
 
 
 def plotcircle1(r: float = 1.0) -> None:
-    x = np.arange(-180.0 * np.pi / 180.0, 180.0 * np.pi / 180.0, 0.01, dtype=np.float)
+    x = np.arange(-180.0 * np.pi / 180.0, 180.0 * np.pi / 180.0, 0.025, dtype=np.float)
+    # x = np.array(
+    #     [0, np.pi / 4.0, np.pi / 2.0, 3.0 * np.pi / 4.0, np.pi, 5.0 * np.pi / 4.0, 3.0 * np.pi / 2.0, 7.0 * np.pi / 4.0,
+    #      2.0 * np.pi])
 
     y = np.vectorize(lambda result: np.sin(result), otypes=[np.float])(x)
     y = np.multiply(y, r)
@@ -20,3 +23,5 @@ def plotcircle1(r: float = 1.0) -> None:
     plt.show()
 
 
+def plotnorm1() -> None:
+    pass
