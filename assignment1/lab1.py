@@ -21,31 +21,31 @@ class Run:
         self.create.safe()
 
         # move forward
-        self.my_robot.forward(5 * 0.1, 0.1)
+        self.my_robot.forward(5 * 0.1)
 
         # left turn (in place)
-        self.my_robot.turn_left(2, 0.1)
+        self.my_robot.turn_left(2)
 
         # wait
         self.my_robot.wait(2)
 
         # right turn (in place)
-        self.my_robot.turn_right(2, 0.1)
+        self.my_robot.turn_right(2)
 
         # wait
         self.my_robot.wait(2)
 
         # move forward
-        self.my_robot.forward(2 * 0.1, 0.1)
+        self.my_robot.forward(2 * 0.1)
 
         # move forward while turning
         self.my_robot.move(0.2, 0.1, 7.5)
 
         # move forward
-        self.my_robot.forward(5 * 0.1, 0.1)
+        self.my_robot.forward(5 * 0.1)
 
         # move backwards
-        self.my_robot.backward(5 * 0.1, 0.1)
+        self.my_robot.backward(5 * 0.1)
 
         # stop
         self.my_robot.wait(3)

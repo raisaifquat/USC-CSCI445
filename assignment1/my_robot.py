@@ -17,13 +17,19 @@ class MyRobot:
 
     def move(
             self,
-            right_wheel_velocity_in_m_per_sec: float = 1.0,
-            left_wheel_velocity_in_m_per_sec: float = 1.0,
+            right_wheel_velocity_in_m_per_sec: float = None,
+            left_wheel_velocity_in_m_per_sec: float = None,
             duration: float = None,  # in seconds
             distance: float = 1.0  # in meters
     ) -> None:
         def get_time(distance_: float, speed_: float) -> float:
             return abs(distance_ / speed_)
+
+        if right_wheel_velocity_in_m_per_sec is None:
+            right_wheel_velocity_in_m_per_sec = self.base_speed
+
+        if left_wheel_velocity_in_m_per_sec is None:
+            left_wheel_velocity_in_m_per_sec = self.base_speed
 
         if duration is None:
             duration = get_time(
@@ -42,17 +48,29 @@ class MyRobot:
         self.stop()
         self.sleep(duration)
 
-    def forward(self, distance: float = 1.0, speed: float = 1.0) -> None:  # speed in m/s
+    def forward(self, distance: float = 1.0, speed: float = None) -> None:  # speed in m/s
+        if speed is None:
+            speed = self.base_speed
+
         self.move(speed, speed, None, distance)
 
-    def backward(self, distance: float = 1.0, speed: float = 1.0) -> None:  # speed in m/s
+    def backward(self, distance: float = 1.0, speed: float = None) -> None:  # speed in m/s
+        if speed is None:
+            speed = self.base_speed
+
         self.forward(distance, -speed)
 
-    def turn_left(self, duration: float = 1.0, speed: float = 1.0) -> None:  # speed in m/s
-        self.move(speed, -speed, duration, None)
+    def turn_left(self, duration: float = 1.0, speed: float = None) -> None:  # speed in m/s
+        if speed is None:
+            speed = self.base_speed
 
-    def turn_right(self, duration: float = 1.0, speed: float = 1.0) -> None:  # speed in m/s
-        self.move(-speed, speed, duration, None)
+        self.move(speed, -speed, duration)
+
+    def turn_right(self, duration: float = 1.0, speed: float = None) -> None:  # speed in m/s
+        if speed is None:
+            speed = self.base_speed
+
+        self.move(-speed, speed, duration)
 
 
 def average(nums: List[float]) -> float:
