@@ -1,7 +1,24 @@
-
+import sys
 from typing import List
 
 
-def mysum1(nums: List[int]) -> int:
+def mysum1(nums: List[int]) -> None:
+    result = 0
+
     for num in nums:
-        print(num)
+        result += num
+
+    print(result)
+
+
+def myfib1(n: int) -> None:
+    def find_fib(n_: int) -> int:
+        if n_ <= 1:
+            return n_
+        else:
+            return find_fib(n_ - 1) + find_fib(n_ - 2)
+
+    if n < 0:
+        print("Error: condition n >= 0 must be satisfied", file=sys.stderr)
+    else:
+        print(find_fib(n))
