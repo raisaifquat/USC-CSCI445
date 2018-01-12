@@ -2,6 +2,7 @@
 Example to move robot forward for 10 seconds
 Use "python3 run.py [--sim] example1" to execute
 """
+from typing import List
 
 
 class Run:
@@ -15,53 +16,76 @@ class Run:
         self.time = factory.create_time_helper()
 
     def run(self):
+        def average(nums: List[float]) -> float:
+            return sum(nums) / len(nums)
+
         def move(
-                right_wheel_velocity_in_mm_per_sec: float = 100.0,
-                left_wheel_velocity_in_mm_per_sec: float = 100.0,
-                num_seconds: float = 10.0
+                right_wheel_velocity_in_m_per_sec: float = 1.0,
+                left_wheel_velocity_in_m_per_sec: float = 1.0,
+                duration: float = None,  # in seconds
+                distance: float = 1.0  # in meters
         ) -> None:
-            self.create.drive_direct(right_wheel_velocity_in_mm_per_sec,
-                                     left_wheel_velocity_in_mm_per_sec)
-            self.time.sleep(num_seconds)
+            def get_time(distance_: float, speed_: float) -> float:
+                return distance_ / speed_
 
-        def wait(num_seconds: float = 10.0) -> None:
-            move(0, 0, num_seconds)
+            if duration is None:
+                duration = get_time(
+                    distance,
+                    average([right_wheel_velocity_in_m_per_sec, left_wheel_velocity_in_m_per_sec])
+                )
 
-        def move_forward(velocity_in_mm_per_sec: float = 100.0, num_seconds: float = 10.0) -> None:
-            move(velocity_in_mm_per_sec, velocity_in_mm_per_sec, num_seconds)
+            self.create.drive_direct(right_wheel_velocity_in_m_per_sec * 1000,
+                                     left_wheel_velocity_in_m_per_sec * 1000)
+            self.time.sleep(duration)
 
-        def move_backward(velocity_in_mm_per_sec: float = 100.0, num_seconds: float = 10.0) -> None:
-            move_forward(-velocity_in_mm_per_sec, num_seconds)
+        def stop() -> None:
+            self.create.drive_direct(0, 0)
+
+        def wait(duration: float = 1.0) -> None:
+            stop()
+            self.time.sleep(duration)
+
+        def forward(distance: float = 1.0, speed: float = 1.0) -> None:  # speed in m/s
+            move(speed, speed, None, distance)
+
+        def backward(distance: float = 1.0, speed: float = 1.0) -> None:  # speed in m/s
+            forward(distance, -speed)
+
+        def turn_left(duration: float = 1.0, speed: float = 1.0) -> None:  # speed in m/s
+            move(speed, -speed, duration, None)
+
+        def turn_right(duration: float = 1.0, speed: float = 1.0) -> None:  # speed in m/s
+            move(-speed, speed, duration, None)
 
         self.create.start()
         self.create.safe()
 
         # move forward
-        move_forward(100, 5)
+        forward(5 * 0.1, 0.1)
 
         # left turn (in place)
-        move(100, -100, 2)
+        turn_left(2, 0.1)
 
         # wait
         wait(2)
 
         # right turn (in place)
-        move(-100, 100, 2)
+        turn_right(2, 0.1)
 
         # wait
         wait(2)
 
         # move forward
-        move_forward(100, 2)
+        forward(2 * 0.1, 0.1)
 
         # move forward while turning
-        move(200, 100, 7.5)
+        move(0.2, 0.1, 7.5)
 
         # move forward
-        move_forward(100, 5)
+        forward(5 * 0.1, 0.1)
 
         # move backwards
-        move_backward(100, 5)
+        backward(5 * 0.1, 0.1)
 
         # stop
         wait(3)

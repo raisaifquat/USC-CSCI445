@@ -16,18 +16,18 @@ class Run:
         self.time = factory.create_time_helper()
 
     def run(self):
-        def get_time(distance: float, speed: float) -> float:
-            return distance / speed
-
         def average(nums: List[float]) -> float:
             return sum(nums) / len(nums)
 
         def move(
                 right_wheel_velocity_in_m_per_sec: float = 1.0,
                 left_wheel_velocity_in_m_per_sec: float = 1.0,
-                duration: float = None,     # in seconds
-                distance: float = 1.0       # in meters
+                duration: float = None,  # in seconds
+                distance: float = 1.0  # in meters
         ) -> None:
+            def get_time(distance_: float, speed_: float) -> float:
+                return distance_ / speed_
+
             if duration is None:
                 duration = get_time(
                     distance,
@@ -45,16 +45,16 @@ class Run:
             stop()
             self.time.sleep(duration)
 
-        def forward(distance: float = 1.0, speed: float = 1.0) -> None:       # speed in m/s
+        def forward(distance: float = 1.0, speed: float = 1.0) -> None:  # speed in m/s
             move(speed, speed, None, distance)
 
-        def backward(distance: float = 1.0, speed: float = 1.0) -> None:      # speed in m/s
+        def backward(distance: float = 1.0, speed: float = 1.0) -> None:  # speed in m/s
             forward(distance, -speed)
 
-        def turn_left(duration: float = 1.0, speed: float = 1.0) -> None:     # speed in m/s
+        def turn_left(duration: float = 1.0, speed: float = 1.0) -> None:  # speed in m/s
             move(speed, -speed, duration, None)
 
-        def turn_right(duration: float = 1.0, speed: float = 1.0) -> None:    # speed in m/s
+        def turn_right(duration: float = 1.0, speed: float = 1.0) -> None:  # speed in m/s
             move(-speed, speed, duration, None)
 
         self.create.start()
