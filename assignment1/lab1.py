@@ -34,8 +34,8 @@ class Run:
                     average([right_wheel_velocity_in_m_per_sec, left_wheel_velocity_in_m_per_sec])
                 )
 
-            self.create.drive_direct(right_wheel_velocity_in_m_per_sec,
-                                     left_wheel_velocity_in_m_per_sec)
+            self.create.drive_direct(right_wheel_velocity_in_m_per_sec * 1000,
+                                     left_wheel_velocity_in_m_per_sec * 1000)
             self.time.sleep(duration)
 
         def stop() -> None:
