@@ -8,20 +8,22 @@ def mysum2(nums: List[int]) -> int:
 
 
 def plotcircle1(r: float = 1.0) -> None:
-    x = np.arange(-180.0 * np.pi / 180.0, 180.0 * np.pi / 180.0, 0.025, dtype=np.float)
-    # x = np.array(
-    #     [0, np.pi / 4.0, np.pi / 2.0, 3.0 * np.pi / 4.0, np.pi, 5.0 * np.pi / 4.0, 3.0 * np.pi / 2.0, 7.0 * np.pi / 4.0,
-    #      2.0 * np.pi])
+    x = np.arange(0.0, 2.0 * np.pi, 0.025, dtype=np.double)
 
-    y = np.vectorize(lambda result: np.sin(result), otypes=[np.float])(x)
+    y = np.vectorize(lambda result: np.sin(result), otypes=[np.double])(x)
     y = np.multiply(y, r)
 
-    x = np.vectorize(lambda result: np.cos(result), otypes=[np.float])(x)
+    x = np.vectorize(lambda result: np.cos(result), otypes=[np.double])(x)
     x = np.multiply(x, r)
 
     plt.plot(x, y)
+    plt.gca().set_aspect('equal', adjustable='box')
+    plt.grid()
     plt.show()
 
 
-def plotnorm1() -> None:
-    pass
+def plotnorm1(num_bins: int = 20) -> None:
+    s = np.random.normal(0, 0.5, 10000)
+
+    plt.hist(s, bins=num_bins, edgecolor='black', linewidth=1.0)
+    plt.show()

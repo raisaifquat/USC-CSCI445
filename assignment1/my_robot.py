@@ -52,7 +52,7 @@ class MyRobot:
         if speed is None:
             speed = self.base_speed
 
-        self.move(speed, speed, None, distance)
+        self.move(speed, speed, distance=distance)
 
     def backward(self, distance: float = 1.0, speed: float = None) -> None:  # speed in m/s
         if speed is None:
