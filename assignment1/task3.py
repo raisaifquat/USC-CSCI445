@@ -4,7 +4,10 @@ from typing import List
 
 
 def mysum2(nums: List[int]) -> int:
-    return np.sum(nums).item()
+    result = np.sum(nums).item()
+
+    print(result)
+    return result
 
 
 def plotcircle1(r: float = 1.0) -> None:
