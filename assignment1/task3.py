@@ -10,10 +10,10 @@ def mysum2(nums: List[int]) -> int:
 def plotcircle1(r: float = 1.0) -> None:
     x = np.arange(0.0, 2.0 * np.pi, 0.025, dtype=np.double)
 
-    y = np.vectorize(lambda result: np.sin(result), otypes=[np.double])(x)
+    y = np.sin(x)
     y = np.multiply(y, r)
 
-    x = np.vectorize(lambda result: np.cos(result), otypes=[np.double])(x)
+    x = np.cos(x)
     x = np.multiply(x, r)
 
     plt.plot(x, y)

@@ -9,6 +9,7 @@ def mysum1(nums: List[int]) -> None:
         result += num
 
     print(result)
+    return result
 
 
 def myfib1(n: int) -> None:
