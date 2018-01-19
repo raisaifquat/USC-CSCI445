@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="8a360780-460b-45ee-96b4-05df2bfaa1f2" name="Default" comment="">
+    <list default="true" id="b513a652-aca5-4965-859a-e5df7d7cdece" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/../.gitignore" afterPath="$PROJECT_DIR$/../.gitignore" />
       <change beforePath="$PROJECT_DIR$/../assignment1/.idea/assignment1.iml" afterPath="" />
       <change beforePath="$PROJECT_DIR$/../assignment1/.idea/misc.xml" afterPath="" />
@@ -9,11 +9,11 @@
       <change beforePath="$PROJECT_DIR$/../assignment1/.idea/other.xml" afterPath="" />
       <change beforePath="$PROJECT_DIR$/../assignment1/.idea/vcs.xml" afterPath="" />
       <change beforePath="$PROJECT_DIR$/../assignment1/.idea/workspace.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/lab1.iml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/../lab1/.idea/lab1.iml" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/../lab1/.idea/misc.xml" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/../lab1/.idea/modules.xml" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/../lab1/.idea/vcs.xml" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/../lab1/.idea/workspace.xml" afterPath="" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -53,8 +53,8 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="Scratches" />
+      <pane id="Scope" />
       <pane id="ProjectPane" />
     </panes>
   </component>
@@ -62,7 +62,7 @@
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../lab2" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -84,11 +84,11 @@
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="8a360780-460b-45ee-96b4-05df2bfaa1f2" name="Default" comment="" />
-      <created>1516389328634</created>
+      <changelist id="b513a652-aca5-4965-859a-e5df7d7cdece" name="Default" comment="" />
+      <created>1516389400015</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1516389328634</updated>
+      <updated>1516389400015</updated>
     </task>
     <servers />
   </component>
