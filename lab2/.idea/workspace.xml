@@ -3,17 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="b513a652-aca5-4965-859a-e5df7d7cdece" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/../.gitignore" afterPath="$PROJECT_DIR$/../.gitignore" />
-      <change beforePath="$PROJECT_DIR$/../assignment1/.idea/assignment1.iml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/../assignment1/.idea/misc.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/../assignment1/.idea/modules.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/../assignment1/.idea/other.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/../assignment1/.idea/vcs.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/../assignment1/.idea/workspace.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/../lab1/.idea/lab1.iml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/../lab1/.idea/misc.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/../lab1/.idea/modules.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/../lab1/.idea/vcs.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/../lab1/.idea/workspace.xml" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/../lab1/.idea/workspace.xml" afterPath="$PROJECT_DIR$/../lab1/.idea/workspace.xml" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
