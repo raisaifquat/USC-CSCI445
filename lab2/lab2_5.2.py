@@ -19,7 +19,8 @@ class Run:
         for i in range(0, 100):
             data[i] = self.sonar.get_distance()
             print(data[i])
-            self.time.sleep(0.1)
+            # self.time.sleep(0.1)
+            self.time.sleep(1 / 20e-3)
 
 
 def plotHist(data: List[float] = None, num_bins: int = 20) -> None:

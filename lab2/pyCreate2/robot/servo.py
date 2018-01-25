@@ -15,8 +15,9 @@ class Servo:
         self.pwm = Pwm(number)
         self.pwm.enable()
         self.full_pulse = 2.25e-3
-        self.interval = 20e-3
-        self.period = self.full_pulse + self.interval
+        # self.interval = 20e-3
+        # self.period = self.full_pulse + self.interval
+        self.period = self.full_pulse
         self.frequency = int(1 / self.period)
 
     def __del__(self) -> None:
@@ -30,5 +31,6 @@ class Servo:
         angle = -90.0 if angle < -90.0 else angle
         angle = 90.0 if angle > 90.0 else angle
 
-        percent = (angle + 90) / 180 * self.full_pulse / self.period
+        # percent = (angle + 90) / 180 * self.full_pulse / self.period
+        percent = (angle + 90) / 180
         self.pwm.set_duty_cycle(percent)
