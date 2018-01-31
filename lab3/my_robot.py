@@ -6,21 +6,23 @@ class MyRobot:
     def __init__(
             self,
             base_speed: float = None,  # base_speed in m/s
-            drive_direct: Callable[[int, int], None] = lambda right_speed, left_speed: print(
-                "Invalid drive_direct function", file=sys.stderr),
-            sleep: Callable[[float], None] = lambda time: print(
-                "Invalid sleep function", file=sys.stderr)
+            create=None,
+            time=None
     ):
         self.base_speed = 0.1 if base_speed is None else base_speed
-        self.drive_direct = drive_direct
-        self.sleep = sleep
+        # self.create = create
+        # self.time = time
+        self.drive_direct = create.drive_direct
+        self.update = create.update
+        self.sleep = time.sleep
 
     def move(
             self,
             right_wheel_velocity_in_m_per_sec: float = None,
             left_wheel_velocity_in_m_per_sec: float = None,
             duration: float = None,  # in seconds
-            distance: float = 1.0  # in meters
+            distance: float = 1.0,  # in meters,
+            is_print: bool = False
     ) -> None:
         def get_time(distance_: float, speed_: float) -> float:
             return abs(distance_ / speed_)
@@ -39,38 +41,47 @@ class MyRobot:
 
         self.drive_direct(int(right_wheel_velocity_in_m_per_sec * 1000),
                           int(left_wheel_velocity_in_m_per_sec * 1000))
+        # self.print_state()
         self.sleep(duration)
+        self.print_state(is_print)
 
     def stop(self) -> None:
         self.drive_direct(0, 0)
 
-    def wait(self, duration: float = 1.0) -> None:
+    def wait(self, duration: float = 1.0, is_print: bool = False) -> None:
         self.stop()
         self.sleep(duration)
+        self.print_state(is_print)
 
-    def forward(self, distance: float = 1.0, speed: float = None) -> None:  # speed in m/s
+    def forward(self, distance: float = 1.0, speed: float = None, is_print: bool = False) -> None:  # speed in m/s
         if speed is None:
             speed = self.base_speed
 
-        self.move(speed, speed, distance=distance)
+        self.move(speed, speed, distance=distance, is_print=is_print)
 
-    def backward(self, distance: float = 1.0, speed: float = None) -> None:  # speed in m/s
+    def backward(self, distance: float = 1.0, speed: float = None, is_print: bool = False) -> None:  # speed in m/s
         if speed is None:
             speed = self.base_speed
 
-        self.forward(distance, -speed)
+        self.forward(distance, -speed, is_print=is_print)
 
-    def turn_left(self, duration: float = 1.0, speed: float = None) -> None:  # speed in m/s
+    def turn_left(self, duration: float = 1.0, speed: float = None, is_print: bool = False) -> None:  # speed in m/s
         if speed is None:
             speed = self.base_speed
 
-        self.move(speed, -speed, duration)
+        self.move(speed, -speed, duration, is_print=is_print)
 
-    def turn_right(self, duration: float = 1.0, speed: float = None) -> None:  # speed in m/s
+    def turn_right(self, duration: float = 1.0, speed: float = None, is_print: bool = False) -> None:  # speed in m/s
         if speed is None:
             speed = self.base_speed
 
-        self.move(-speed, speed, duration)
+        self.move(-speed, speed, duration, is_print=is_print)
+
+    def print_state(self, is_print: bool = False):
+        state = self.update()
+        if state is None and not is_print:
+            return
+        print(state.__dict__)
 
 
 def average(nums: List[float]) -> float:

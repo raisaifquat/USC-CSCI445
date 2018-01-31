@@ -15,53 +15,39 @@ class Run:
         """
         self.create = factory.create_create()
         self.time = factory.create_time_helper()
-        self.my_robot = MyRobot(None, self.create.drive_direct, self.time.sleep)
+        self.my_robot = MyRobot(None, self.create, self.time)
 
     def run(self):
-        def move_robot(state = None):
-            def print_func():
-                if state is not None:
-                    print(state)
-
+        def move_robot(is_print: bool = False):
             # move forward
-            self.my_robot.forward(5 * 0.1)
-            print_func()
+            self.my_robot.forward(5 * 0.1, is_print=is_print)
 
             # left turn (in place)
-            self.my_robot.turn_left(2)
-            print_func()
+            self.my_robot.turn_left(2, is_print=is_print)
 
             # wait
-            self.my_robot.wait(2)
-            print_func()
+            self.my_robot.wait(2, is_print=is_print)
 
             # right turn (in place)
-            self.my_robot.turn_right(2)
-            print_func()
+            self.my_robot.turn_right(2, is_print=is_print)
 
             # wait
-            self.my_robot.wait(2)
-            print_func()
+            self.my_robot.wait(2, is_print=is_print)
 
             # move forward
-            self.my_robot.forward(2 * 0.1)
-            print_func()
+            self.my_robot.forward(2 * 0.1, is_print=is_print)
 
             # move forward while turning
-            self.my_robot.move(0.2, 0.1, 7.5)
-            print_func()
+            self.my_robot.move(0.2, 0.1, 7.5, is_print=is_print)
 
             # move forward
-            self.my_robot.forward(5 * 0.1)
-            print_func()
+            self.my_robot.forward(5 * 0.1, is_print=is_print)
 
             # move backwards
-            self.my_robot.backward(5 * 0.1)
-            print_func()
+            self.my_robot.backward(5 * 0.1, is_print=is_print)
 
             # stop
-            self.my_robot.wait(3)
-            print_func()
+            self.my_robot.wait(3, is_print=is_print)
 
         self.create.start()
         self.create.safe()
@@ -73,7 +59,7 @@ class Run:
         ])
 
         while True:
-            state = self.create.update()
-            if state is not None:
-                move_robot(state.__dict__)
-                # print(state.__dict__)
+            move_robot(True)
+            # state = self.create.update()
+            # if state is not None:
+            #     print(state.__dict__)
