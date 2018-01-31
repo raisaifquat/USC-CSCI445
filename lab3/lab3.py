@@ -5,6 +5,13 @@ Use "run.py [--sim] lab3" to execute
 from pyCreate2 import create2
 from my_robot import MyRobot
 
+robotProperties = {
+    "diameter_left": 72,
+    "diameter_right": 72,
+    "wheel_base": 235,
+    "encoder_count": 508.8
+}
+
 
 class Run:
     def __init__(self, factory):
