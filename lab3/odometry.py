@@ -29,5 +29,11 @@ class Odometry:
 
         return (delta_r + delta_l) / 2.0
 
-    def get_delta_theta(self, r_encoder_count: int, l_encoder_count: int) -> float:
-        return (self.get_delta_r(r_encoder_count) - self.get_delta_l(l_encoder_count)) / self.wheel_base
+    def get_delta_theta(self, r_encoder_count: int = 0, l_encoder_count: int = 0,
+                        delta_r: float = None, delta_l: float = None) -> float:
+        if delta_r is None:
+            delta_r = self.get_delta_r(r_encoder_count)
+        if delta_l is None:
+            delta_l = self.get_delta_l(l_encoder_count)
+
+        return (delta_r - delta_l) / self.wheel_base
