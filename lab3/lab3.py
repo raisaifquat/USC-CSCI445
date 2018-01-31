@@ -4,6 +4,8 @@ Use "run.py [--sim] lab3" to execute
 """
 from pyCreate2 import create2
 from my_robot import MyRobot
+from odometry import Odometry
+
 
 robotProperties = {
     "diameter_left": 72,
@@ -22,6 +24,12 @@ class Run:
         """
         self.create = factory.create_create()
         self.time = factory.create_time_helper()
+        self.odometry = Odometry(
+            robotProperties["diameter_left"],
+            robotProperties["diameter_right"],
+            robotProperties["wheel_base"],
+            robotProperties["encoder_count"]
+        )
         self.my_robot = MyRobot(None, self.create, self.time)
 
     def run(self):
@@ -67,6 +75,6 @@ class Run:
 
         while True:
             move_robot(True)
-            # state = self.create.update()
+            state = self.create.update()
             # if state is not None:
             #     print(state.__dict__)
