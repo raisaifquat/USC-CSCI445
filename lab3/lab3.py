@@ -30,7 +30,7 @@ class Run:
             robotProperties["wheel_base"],
             robotProperties["encoder_count"]
         )
-        self.my_robot = MyRobot(None, self.create, self.time)
+        self.my_robot = MyRobot(None, self.create, self.time, self.odometry)
 
     def run(self):
         def move_robot(is_print: bool = False):
@@ -73,8 +73,15 @@ class Run:
             create2.Sensor.RightEncoderCounts,
         ])
 
+        l = 0
+        r = 0
+
         while True:
             move_robot(True)
-            state = self.create.update()
+            # self.create.drive_direct(100, 100)
+            # self.time.sleep(1)
+            # state = self.create.update()
             # if state is not None:
-            #     print(state.__dict__)
+                # print(state.__dict__)
+                # print("delta_r: " + str(self.odometry.get_delta_r(state.rightEncoderCounts)))
+                # print("delta_l: " + str(self.odometry.get_delta_l(state.leftEncoderCounts)))

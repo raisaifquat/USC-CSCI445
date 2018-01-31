@@ -1,5 +1,4 @@
-from typing import List, Callable
-import sys
+from typing import List
 
 
 class MyRobot:
@@ -7,14 +6,34 @@ class MyRobot:
             self,
             base_speed: float = None,  # base_speed in m/s
             create=None,
-            time=None
+            time=None,
+            odometry=None
     ):
         self.base_speed = 0.1 if base_speed is None else base_speed
         # self.create = create
-        # self.time = time
+        self.time = time
         self.drive_direct = create.drive_direct
         self.update = create.update
-        self.sleep = time.sleep
+        self.odometry = odometry
+
+    def sleep(self, wait_in_sec: float = 0.0, is_print: bool = False):
+        def print_odometry(state_):
+            delta_r = self.odometry.get_delta_r(state_.rightEncoderCounts)
+            delta_l = self.odometry.get_delta_l(state_.leftEncoderCounts)
+            delta_theta = self.odometry.get_delta_theta(delta_r=delta_r, delta_l=delta_l)
+
+            print("[%f, %f, %f]" % (delta_r, delta_l, delta_theta))
+
+        if not is_print:
+            self.time.sleep(wait_in_sec)
+            return
+
+        for i in range(0, int(wait_in_sec)):
+            self.time.sleep(1)
+            state = self.update()
+            if state is not None:
+                print("not None")
+                print_odometry(state)
 
     def move(
             self,
@@ -42,16 +61,15 @@ class MyRobot:
         self.drive_direct(int(right_wheel_velocity_in_m_per_sec * 1000),
                           int(left_wheel_velocity_in_m_per_sec * 1000))
         # self.print_state()
-        self.sleep(duration)
-        self.print_state(is_print)
+        self.sleep(duration, is_print=is_print)
 
     def stop(self) -> None:
         self.drive_direct(0, 0)
 
     def wait(self, duration: float = 1.0, is_print: bool = False) -> None:
         self.stop()
-        self.sleep(duration)
-        self.print_state(is_print)
+        self.sleep(duration, is_print=is_print)
+        # self.print_state(is_print)
 
     def forward(self, distance: float = 1.0, speed: float = None, is_print: bool = False) -> None:  # speed in m/s
         if speed is None:
