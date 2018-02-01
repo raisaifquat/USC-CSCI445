@@ -3,7 +3,7 @@ Sample Code for Lab3
 Use "run.py [--sim] lab3" to execute
 """
 from pyCreate2 import create2
-from my_robot import MyRobot
+# from my_robot import MyRobot
 from odometry import Odometry
 import numpy as np
 
@@ -30,7 +30,7 @@ class Run:
             robotProperties["wheel_base"],
             robotProperties["encoder_count"]
         )
-        self.my_robot = MyRobot(None, self.create, self.time, self.odometry)
+        # self.my_robot = MyRobot(None, self.create, self.time, self.odometry)
         self.x = 0.0
         self.y = 0.0
         self.angle = 0.0
@@ -95,26 +95,27 @@ class Run:
             create2.Sensor.RightEncoderCounts,
         ])
 
-        while self.time.time() < 5:
-            self.create.drive_direct(100, 100)
+        # move forward
+        while self.time.time() < 10:
+            self.create.drive_direct(50, 50)
             state = self.create.update()
             if state is not None:
                 print(state.__dict__)
                 self.print_odometry(state)
 
+        print("\n--------------reverse----------------")
         start_time = self.time.time()
+        while self.time.time() - start_time < 10:
+            self.create.drive_direct(-50, -50)
+            state = self.create.update()
+            if state is not None:
+                print(state.__dict__)
+                self.print_odometry(state)
+
         print("\n--------------turning----------------")
-        while self.time.time() - start_time < 2:
-            self.create.drive_direct(100, -100)
-            state = self.create.update()
-            if state is not None:
-                print(state.__dict__)
-                self.print_odometry(state)
-
         start_time = self.time.time()
-        print("\n--------------go straight again----------------")
-        while self.time.time() - start_time < 5:
-            self.create.drive_direct(100, 100)
+        while self.time.time() - start_time < 10:
+            self.create.drive_direct(50, -50)
             state = self.create.update()
             if state is not None:
                 print(state.__dict__)
