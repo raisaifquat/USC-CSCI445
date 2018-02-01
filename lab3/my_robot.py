@@ -1,4 +1,5 @@
 from typing import List
+import numpy as np
 
 
 class MyRobot:
@@ -16,25 +17,30 @@ class MyRobot:
         self.update = create.update
         self.odometry = odometry
 
+        self.x = 0.0
+        self.y = 0.0
+
     def sleep(self, wait_in_sec: float = 0.0, is_print: bool = False):
         def print_odometry(state_):
             delta_r = self.odometry.get_delta_r(state_.rightEncoderCounts)
             delta_l = self.odometry.get_delta_l(state_.leftEncoderCounts)
             delta_theta = self.odometry.get_delta_theta(delta_r=delta_r, delta_l=delta_l)
+            delta_d = self.odometry.get_delta_d(delta_r=delta_r, delta_l=delta_l)
 
             print("[delta_r = %f, delta_l = %f, delta_theta = %f]" % (delta_r, delta_l, delta_theta))
-            self.odometry.r_distance += delta_r
-            self.odometry.l_distance += delta_l
+            self.x += delta_d * np.cos(self.odometry.angle)
+            self.y += delta_d * np.sin(self.odometry.angle)
             self.odometry.angle += delta_theta
-            print("[r = %f, l = %f, angle = %f]" % (self.odometry.r_distance,
-                                                    self.odometry.l_distance, self.odometry.angle))
+            print("[x = %f, y = %f, angle = %f]\n" % (self.x,
+                                                      self.y,
+                                                      self.odometry.angle % 360))
 
         if not is_print:
             self.time.sleep(wait_in_sec)
             return
 
-        for i in range(0, int(wait_in_sec)):
-            self.time.sleep(1)
+        start_time = self.time.time()
+        while (self.time.time() - start_time) < wait_in_sec:
             state = self.update()
             if state is not None:
                 # print("not None")
