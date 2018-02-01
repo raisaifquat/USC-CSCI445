@@ -22,7 +22,12 @@ class MyRobot:
             delta_l = self.odometry.get_delta_l(state_.leftEncoderCounts)
             delta_theta = self.odometry.get_delta_theta(delta_r=delta_r, delta_l=delta_l)
 
-            print("[%f, %f, %f]" % (delta_r, delta_l, delta_theta))
+            print("[delta_r = %f, delta_l = %f, delta_theta = %f]" % (delta_r, delta_l, delta_theta))
+            self.odometry.r_distance += delta_r
+            self.odometry.l_distance += delta_l
+            self.odometry.angle += delta_theta
+            print("[r = %f, l = %f, angle = %f]" % (self.odometry.r_distance,
+                                                    self.odometry.l_distance, self.odometry.angle))
 
         if not is_print:
             self.time.sleep(wait_in_sec)
@@ -32,7 +37,7 @@ class MyRobot:
             self.time.sleep(1)
             state = self.update()
             if state is not None:
-                print("not None")
+                # print("not None")
                 print_odometry(state)
 
     def move(
