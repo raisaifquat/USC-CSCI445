@@ -1,3 +1,6 @@
+from utils import clamp
+
+
 class PDController:
     def __init__(self, k_p: float = 0.0, k_d: float = 0.0,
                  range_min: float = -500.0, range_max: float = 500.0):
@@ -43,6 +46,3 @@ class PDController:
 
         return clamp(current_val + error * self.k_p + self.k_d * de_dt, self.range_min, self.range_max)
 
-
-def clamp(value, range_min, range_max):
-    return max(min(value, range_max), range_min)
