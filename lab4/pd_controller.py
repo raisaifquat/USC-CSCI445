@@ -11,15 +11,20 @@ class PDController:
         self.error = 0.0
         pass
 
-    def update(self, error: float, current_time: float = 0.0) -> float:
-        if (current_time - self.current_time) == 0:
-            de_dt = 0.0
-        else:
-            de_dt = (error - self.error)/(current_time - self.current_time)
+    def update(self, goal: float, current_val: float, current_time: float = 0.0) -> float:
+        error = goal - current_val
+        delta_time = current_time - self.current_time
+        delta_error = error - self.error
+
+        de_dt = 0.0 if delta_time == 0 else delta_error / delta_time
 
         # print("de/dt = %f" % de_dt)
 
         self.error = error
         self.current_time = current_time
 
-        return self.error * self.k_p + self.k_d * de_dt
+        return clamp(current_val + self.error * self.k_p + self.k_d * de_dt, self.range_min, self.range_max)
+
+
+def clamp(value, range_min, range_max):
+    return max(min(value, range_max), range_min)
