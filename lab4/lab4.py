@@ -30,7 +30,7 @@ class Run:
             robotProperties["encoder_count"]
         )
         self.p_controller = PController(k_p=1.0)
-        self.pd_controller = PDController(k_p=1.0, k_d=1.0)
+        self.pd_controller = PDController(k_p=1.0, k_d=-1.0)
 
     def run(self):
 
@@ -69,10 +69,10 @@ class Run:
                 #     time_elapsed, self.odometry.r_speed, self.odometry.l_speed
                 # ))
 
-                v_right_update = self.p_controller.update(v_right_goal, self.odometry.r_speed, False)
-                v_left_update = self.p_controller.update(v_left_goal, self.odometry.l_speed, True)
-                # v_right_update = self.pd_controller.update(v_right_goal, self.odometry.r_speed, curr_time, False)
-                # v_left_update = self.pd_controller.update(v_left_goal, self.odometry.l_speed, curr_time, True)
+                # v_right_update = self.p_controller.update_right(v_right_goal, self.odometry.r_speed)
+                # v_left_update = self.p_controller.update_left(v_left_goal, self.odometry.l_speed)
+                v_right_update = self.pd_controller.update_right(v_right_goal, self.odometry.r_speed, curr_time)
+                v_left_update = self.pd_controller.update_left(v_left_goal, self.odometry.l_speed, curr_time)
                 # print("v_right_update: %f, v_left_update: %f\n" % (v_right_update, v_left_update))
 
                 time_arr = np.append(time_arr, curr_time)
@@ -82,20 +82,20 @@ class Run:
             prev_time = curr_time
             curr_time = self.time.time()
 
-        # plt.plot(time_arr, r_speed_arr)
+        plt.plot(time_arr, r_speed_arr)
         # plt.plot(time_arr, l_speed_arr)
-        # plt.xlabel('time')
-        # plt.ylabel('right wheel speed')
-        # plt.grid()
-        # plt.show()
-        file = open('output.txt', 'w')
-        file.write("time_arr = np.array([")
-        for i in range(0, len(time_arr)):
-            file.write("%f, " % time_arr[i])
-        file.write("])\n")
-
-        file.write("r_speed_arr = np.array([")
-        for i in range(0, len(r_speed_arr)):
-            file.write("%f, " % time_arr[i])
-        file.write("])")
-        file.close()
+        plt.xlabel('time')
+        plt.ylabel('right wheel speed')
+        plt.grid()
+        plt.show()
+        # file = open('output.txt', 'w')
+        # file.write("time_arr = np.array([")
+        # for i in range(0, len(time_arr)):
+        #     file.write("%f, " % time_arr[i])
+        # file.write("])\n")
+        #
+        # file.write("r_speed_arr = np.array([")
+        # for i in range(0, len(r_speed_arr)):
+        #     file.write("%f, " % time_arr[i])
+        # file.write("])")
+        # file.close()
