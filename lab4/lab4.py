@@ -44,18 +44,19 @@ class Run:
         ])
 
         r_speed_arr = np.array([])
+        l_speed_arr = np.array([])
         time_arr = np.array([])
 
-        l_goal_speed = 100
-        r_goal_speed = 100
-        l_update = 0
-        r_update = 0
+        v_left_goal = 100
+        v_right_goal = 100
+        v_left_update = 0
+        v_right_update = 0
 
         start_time = self.time.time()
         curr_time = start_time
         prev_time = curr_time
         while curr_time - start_time < 5:
-            self.create.drive_direct(l_update, r_update)
+            self.create.drive_direct(v_left_update, v_right_update)
             state = self.create.update()
             if state is not None:
                 print(state.__dict__)
@@ -68,19 +69,21 @@ class Run:
                     time_elapsed, self.odometry.r_speed, self.odometry.l_speed
                 ))
 
-                r_update = self.p_controller.update(r_goal_speed, self.odometry.r_speed, False)
-                l_update = self.p_controller.update(l_goal_speed, self.odometry.l_speed, True)
-                # r_update = self.pd_controller.update(r_goal_speed, self.odometry.r_speed, curr_time, False)
-                # l_update = self.pd_controller.update(l_goal_speed, self.odometry.l_speed, curr_time, True)
-                print("r_update_value: %f, l_update_value: %f\n" % (r_update, l_update))
+                # v_right_update = self.p_controller.update(v_right_goal, self.odometry.r_speed, False)
+                # v_left_update = self.p_controller.update(v_left_goal, self.odometry.l_speed, True)
+                v_right_update = self.pd_controller.update(v_right_goal, self.odometry.r_speed, curr_time, False)
+                v_left_update = self.pd_controller.update(v_left_goal, self.odometry.l_speed, curr_time, True)
+                print("v_right_update: %f, v_left_update: %f\n" % (v_right_update, v_left_update))
 
                 time_arr = np.append(time_arr, curr_time)
-                r_speed_arr = np.append(r_speed_arr, self.odometry.r_speed)
+                r_speed_arr = np.append(v_right_update, self.odometry.r_speed)
+                l_speed_arr = np.append(v_right_update, self.odometry.l_speed)
 
             prev_time = curr_time
             curr_time = self.time.time()
 
         plt.plot(time_arr, r_speed_arr)
+        # plt.plot(time_arr, l_speed_arr)
         plt.xlabel('time')
         plt.ylabel('right wheel speed')
         plt.grid()
