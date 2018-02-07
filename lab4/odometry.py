@@ -58,8 +58,8 @@ class Odometry:
         delta_theta = self.get_delta_theta(delta_r=delta_r, delta_l=delta_l)
         delta_d = self.get_delta_d(delta_r=delta_r, delta_l=delta_l)
 
-        print("[delta_r = %f, delta_l = %f, delta_d = %f, delta_theta = %f]" % (delta_r, delta_l, delta_d, delta_theta))
-
+        # print("[delta_r = %f, delta_l = %f, delta_d = %f, delta_theta = %f]" %
+        #       (delta_r, delta_l, delta_d, delta_theta))
         self.x += delta_d * np.cos(self.angle)
         self.y += delta_d * np.sin(self.angle)
         self.angle += delta_theta
