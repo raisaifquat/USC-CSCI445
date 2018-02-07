@@ -33,6 +33,10 @@ class PDController:
 
         de_dt = 0.0 if delta_time == 0 else delta_error / delta_time
 
+        # print("error = %f" % error)
+        # print("de/dt = %f" % de_dt)
+        # print("delta_error = %f" % delta_error)
+        # print("delta_time = %f" % delta_time)
         # print("de/dt = %f" % de_dt)
         self.r_error = error
         self.r_current_time = current_time
