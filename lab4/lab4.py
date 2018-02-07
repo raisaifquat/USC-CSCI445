@@ -30,7 +30,7 @@ class Run:
             robotProperties["encoder_count"]
         )
         self.p_controller = PController(k_p=1.0)
-        self.pd_controller = PDController(k_p=1.0, k_d=-0.002)
+        self.pd_controller = PDController(k_p=1.5, k_d=0.0025)
 
     def run(self):
 
@@ -55,7 +55,7 @@ class Run:
         start_time = self.time.time()
         curr_time = start_time
         prev_time = curr_time
-        while curr_time - start_time < 3:
+        while curr_time - start_time < 20:
             self.create.drive_direct(v_left_update, v_right_update)
             state = self.create.update()
             if state is not None:
