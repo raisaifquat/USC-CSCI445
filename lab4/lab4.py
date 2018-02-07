@@ -1,6 +1,8 @@
 from pyCreate2 import create2
-from p_controller import PController
 from odometry import Odometry
+from p_controller import PController
+from pd_controller import PDController
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -28,6 +30,7 @@ class Run:
             robotProperties["encoder_count"]
         )
         self.p_controller = PController(k_p=1.0)
+        self.pd_controller = PDController(k_p=1.0, k_d=1.0)
 
     def run(self):
 
