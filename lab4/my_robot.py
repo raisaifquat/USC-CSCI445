@@ -1,26 +1,58 @@
-from typing import List, Callable
-import sys
+from typing import List
+import numpy as np
 
 
 class MyRobot:
     def __init__(
             self,
             base_speed: float = None,  # base_speed in m/s
-            drive_direct: Callable[[int, int], None] = lambda right_speed, left_speed: print(
-                "Invalid drive_direct function", file=sys.stderr),
-            sleep: Callable[[float], None] = lambda time: print(
-                "Invalid sleep function", file=sys.stderr)
+            create=None,
+            time=None,
+            odometry=None
     ):
         self.base_speed = 0.1 if base_speed is None else base_speed
-        self.drive_direct = drive_direct
-        self.sleep = sleep
+        # self.create = create
+        self.time = time
+        self.drive_direct = create.drive_direct
+        self.update = create.update
+        self.odometry = odometry
+
+        self.x = 0.0
+        self.y = 0.0
+
+    def sleep(self, wait_in_sec: float = 0.0, is_print: bool = False):
+        def print_odometry(state_):
+            delta_r = self.odometry.get_delta_r(state_.rightEncoderCounts)
+            delta_l = self.odometry.get_delta_l(state_.leftEncoderCounts)
+            delta_theta = self.odometry.get_delta_theta(delta_r=delta_r, delta_l=delta_l)
+            delta_d = self.odometry.get_delta_d(delta_r=delta_r, delta_l=delta_l)
+
+            print("[delta_r = %f, delta_l = %f, delta_theta = %f]" % (delta_r, delta_l, delta_theta))
+            self.x += delta_d * np.cos(self.odometry.angle)
+            self.y += delta_d * np.sin(self.odometry.angle)
+            self.odometry.angle += delta_theta
+            print("[x = %f, y = %f, angle = %f]\n" % (self.x,
+                                                      self.y,
+                                                      self.odometry.angle % 360))
+
+        if not is_print:
+            self.time.sleep(wait_in_sec)
+            return
+
+        start_time = self.time.time()
+        while (self.time.time() - start_time) < wait_in_sec:
+            state = self.update()
+            if state is not None:
+                # print("not None")
+                print_odometry(state)
 
     def move(
             self,
             right_wheel_velocity_in_m_per_sec: float = None,
             left_wheel_velocity_in_m_per_sec: float = None,
             duration: float = None,  # in seconds
-            distance: float = 1.0  # in meters
+            distance: float = 1.0,  # in meters,
+            is_print: bool = False
     ) -> None:
         def get_time(distance_: float, speed_: float) -> float:
             return abs(distance_ / speed_)
@@ -39,38 +71,46 @@ class MyRobot:
 
         self.drive_direct(int(right_wheel_velocity_in_m_per_sec * 1000),
                           int(left_wheel_velocity_in_m_per_sec * 1000))
-        self.sleep(duration)
+        # self.print_state()
+        self.sleep(duration, is_print=is_print)
 
     def stop(self) -> None:
         self.drive_direct(0, 0)
 
-    def wait(self, duration: float = 1.0) -> None:
+    def wait(self, duration: float = 1.0, is_print: bool = False) -> None:
         self.stop()
-        self.sleep(duration)
+        self.sleep(duration, is_print=is_print)
+        # self.print_state(is_print)
 
-    def forward(self, distance: float = 1.0, speed: float = None) -> None:  # speed in m/s
+    def forward(self, distance: float = 1.0, speed: float = None, is_print: bool = False) -> None:  # speed in m/s
         if speed is None:
             speed = self.base_speed
 
-        self.move(speed, speed, distance=distance)
+        self.move(speed, speed, distance=distance, is_print=is_print)
 
-    def backward(self, distance: float = 1.0, speed: float = None) -> None:  # speed in m/s
+    def backward(self, distance: float = 1.0, speed: float = None, is_print: bool = False) -> None:  # speed in m/s
         if speed is None:
             speed = self.base_speed
 
-        self.forward(distance, -speed)
+        self.forward(distance, -speed, is_print=is_print)
 
-    def turn_left(self, duration: float = 1.0, speed: float = None) -> None:  # speed in m/s
+    def turn_left(self, duration: float = 1.0, speed: float = None, is_print: bool = False) -> None:  # speed in m/s
         if speed is None:
             speed = self.base_speed
 
-        self.move(speed, -speed, duration)
+        self.move(speed, -speed, duration, is_print=is_print)
 
-    def turn_right(self, duration: float = 1.0, speed: float = None) -> None:  # speed in m/s
+    def turn_right(self, duration: float = 1.0, speed: float = None, is_print: bool = False) -> None:  # speed in m/s
         if speed is None:
             speed = self.base_speed
 
-        self.move(-speed, speed, duration)
+        self.move(-speed, speed, duration, is_print=is_print)
+
+    def print_state(self, is_print: bool = False):
+        state = self.update()
+        if state is None and not is_print:
+            return
+        print(state.__dict__)
 
 
 def average(nums: List[float]) -> float:

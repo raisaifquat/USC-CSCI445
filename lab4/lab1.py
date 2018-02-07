@@ -14,7 +14,7 @@ class Run:
         """
         self.create = factory.create_create()
         self.time = factory.create_time_helper()
-        self.my_robot = MyRobot(None, self.create.drive_direct, self.time.sleep)
+        self.my_robot = MyRobot(None, self.create, self.time)
 
     def run(self):
         self.create.start()
