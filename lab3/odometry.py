@@ -17,6 +17,8 @@ class Odometry:
         self.r_distance = 0.0
         self.l_distance = 0.0
         self.angle = 0.0
+        self.x = 0.0
+        self.y = 0.0
 
     def get_delta_r(self, r_encoder_count: int) -> float:
         return self.diameter_right * r_encoder_count / self.wheel_base * np.pi
