@@ -68,10 +68,10 @@ class Run:
                     time_elapsed, self.odometry.r_speed, self.odometry.l_speed
                 ))
 
-                r_update = self.p_controller.update(r_goal_speed, self.odometry.r_speed)
-                l_update = self.p_controller.update(l_goal_speed, self.odometry.l_speed)
-                # r_update = self.pd_controller.update(r_goal_speed, self.odometry.r_speed, curr_time)
-                # l_update = self.pd_controller.update(l_goal_speed, self.odometry.l_speed, curr_time)
+                # r_update = self.p_controller.update(r_goal_speed, self.odometry.r_speed)
+                # l_update = self.p_controller.update(l_goal_speed, self.odometry.l_speed)
+                r_update = self.pd_controller.update(r_goal_speed, self.odometry.r_speed, curr_time)
+                l_update = self.pd_controller.update(l_goal_speed, self.odometry.l_speed, curr_time)
                 print("r_update_value: %f, l_update_value: %f\n" % (r_update, l_update))
 
                 time_arr = np.append(time_arr, curr_time)
