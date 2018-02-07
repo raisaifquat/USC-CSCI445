@@ -7,7 +7,7 @@ class PController:
         self.k_p = k_p
         pass
 
-    def update(self, goal: float, curr_state: float) -> float:
-        self.error = goal - curr_state
+    def update(self, error: float) -> float:
+        self.error = error
 
-        return self.error * self.k_p
+        return error * self.k_p

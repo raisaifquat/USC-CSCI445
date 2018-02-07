@@ -30,7 +30,7 @@ class Run:
             robotProperties["encoder_count"]
         )
         self.p_controller = PController(k_p=1.0)
-        self.pd_controller = PDController(k_p=1.0, k_d=1.0)
+        self.pd_controller = PDController(k_p=1.0, k_d=-1.0)
 
     def run(self):
 
@@ -68,8 +68,10 @@ class Run:
                     time_elapsed, self.odometry.r_speed, self.odometry.l_speed
                 ))
 
-                r_update = self.p_controller.update(r_goal_speed, self.odometry.r_speed)
-                l_update = self.p_controller.update(l_goal_speed, self.odometry.l_speed)
+                # r_update = self.p_controller.update(r_goal_speed - self.odometry.r_speed)
+                # l_update = self.p_controller.update(l_goal_speed - self.odometry.l_speed)
+                r_update = self.pd_controller.update(r_goal_speed - self.odometry.r_speed, curr_time)
+                l_update = self.pd_controller.update(l_goal_speed - self.odometry.l_speed, curr_time)
                 print("r_update_value: %f, l_update_value: %f\n" % (r_update, l_update))
 
                 time_arr = np.append(time_arr, curr_time)
