@@ -27,17 +27,17 @@ class Run:
         self.servo = factory.create_servo()
         self.sonar = factory.create_sonar()
         self.p_controller = PController(k_p=500.0)
-        self.pd_controller = PDController(k_p=500.0, k_d=0.0)
+        self.pd_controller = PDController(k_p=500.0, k_d=50.0)
 
     def run(self):
         def f_left(error, speed, curr_time_) -> float:
-            # ctrl = self.p_controller.update(error)
-            ctrl = self.pd_controller.update(
-                error,
-                error - self.pd_controller.prev_l_error,
-                curr_time_ - self.pd_controller.prev_l_time
-            )
-            # print("left ctrl: %f" % ctrl)
+            ctrl = self.p_controller.update(error)
+            # ctrl = self.pd_controller.update(
+            #     error,
+            #     error - self.pd_controller.prev_l_error,
+            #     curr_time_ - self.pd_controller.prev_l_time
+            # )
+            print("left ctrl: %f" % ctrl)
             self.pd_controller.prev_l_error = error
             self.pd_controller.prev_l_time = curr_time_
 
@@ -45,12 +45,12 @@ class Run:
                          self.p_controller.range_max)
 
         def f_right(error, speed, curr_time_) -> float:
-            # ctrl = self.p_controller.update(error)
-            ctrl = self.pd_controller.update(
-                error,
-                error - self.pd_controller.prev_r_error,
-                curr_time_ - self.pd_controller.prev_r_time
-            )
+            ctrl = self.p_controller.update(error)
+            # ctrl = self.pd_controller.update(
+            #     error,
+            #     error - self.pd_controller.prev_r_error,
+            #     curr_time_ - self.pd_controller.prev_r_time
+            # )
             # print("right ctrl: %f" % ctrl)
             self.pd_controller.prev_r_error = error
             self.pd_controller.prev_r_time = curr_time_
