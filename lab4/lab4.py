@@ -78,7 +78,7 @@ class Run:
             curr_state = self.sonar.get_distance()
             self.time.sleep(0.1)
             print("[left: %f, right: %f]\n" % (f_left(l_goal - curr_state, vl), f_right(r_goal - curr_state, vr)))
-            self.create.drive_direct(f_left(goal - curr_state, vl), f_right(goal - curr_state, vr))
+            self.create.drive_direct(f_left(l_goal - curr_state, vl), f_right(r_goal - curr_state, vr))
 
             # prev_time = curr_time
             curr_time = self.time.time()
