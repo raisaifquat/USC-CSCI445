@@ -55,17 +55,15 @@ class Run:
         goal = 0.5
         print(goal)
 
-        # l_goal = goal - robotProperties["wheel_base"]
-        # r_goal = goal + robotProperties["wheel_base"]
         vl = 100.0
         vr = 100.0
+
+        plt_distance = ()
 
         start_time = self.time.time()
         curr_time = start_time
         # prev_time = curr_time
-        curr_state = np.array([])
         while curr_time - start_time < 100:
-            # curr_state = np.min(curr_state)
             curr_state = self.sonar.get_distance()
             self.time.sleep(0.1)
 
