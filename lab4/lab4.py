@@ -26,40 +26,20 @@ class Run:
         self.time = factory.create_time_helper()
         self.servo = factory.create_servo()
         self.sonar = factory.create_sonar()
-        self.p_controller = PController(k_p=200.0)
+        self.p_controller = PController(k_p=500.0)
         self.pd_controller = PDController(k_p=1.5, k_d=0.0025)
 
     def run(self):
         def f_left(error, speed) -> float:
             ctrl = self.p_controller.update(error)
-            print("left ctrl: %f" % ctrl)
-            # if error > 0:
-            #     # too close
-            #     # increase
-            #     res = speed + ctrl
-            # elif error < 0:
-            #     # too far
-            #     # increase
-            #     res = speed - ctrl
-            # else:
-            #     res = 100.0
+            # print("left ctrl: %f" % ctrl)
 
             return clamp(speed + ctrl, self.p_controller.range_min,
                          self.p_controller.range_max)
 
         def f_right(error, speed) -> float:
             ctrl = self.p_controller.update(error)
-            print("right ctrl: %f" % ctrl)
-            # if error > 0:
-            #     # too close to wall
-            #     # decrease right speed
-            #     res = speed - ctrl
-            # elif error < 0:
-            #     # too far to wall
-            #     # decrease right speed
-            #     res = speed + ctrl
-            # else:
-            #     res = 100.0
+            # print("right ctrl: %f" % ctrl)
 
             return clamp(speed - ctrl, self.p_controller.range_min,
                          self.p_controller.range_max)
@@ -67,7 +47,7 @@ class Run:
         self.create.start()
         self.create.safe()
 
-        self.servo.go_to(45)
+        self.servo.go_to(50)
         self.time.sleep(1)
 
         start_time = self.time.time()
