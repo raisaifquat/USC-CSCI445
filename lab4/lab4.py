@@ -27,19 +27,33 @@ class Run:
         self.servo = factory.create_servo()
         self.sonar = factory.create_sonar()
         self.p_controller = PController(k_p=500.0)
-        self.pd_controller = PDController(k_p=1.5, k_d=0.0025)
+        self.pd_controller = PDController(k_p=500.0, k_d=0.0)
 
     def run(self):
-        def f_left(error, speed) -> float:
-            ctrl = self.p_controller.update(error)
+        def f_left(error, speed, curr_time_) -> float:
+            # ctrl = self.p_controller.update(error)
+            ctrl = self.pd_controller.update(
+                error,
+                error - self.pd_controller.prev_l_error,
+                curr_time_ - self.pd_controller.prev_l_time
+            )
             # print("left ctrl: %f" % ctrl)
+            self.pd_controller.prev_l_error = error
+            self.pd_controller.prev_l_time = curr_time_
 
             return clamp(speed + ctrl, self.p_controller.range_min,
                          self.p_controller.range_max)
 
-        def f_right(error, speed) -> float:
-            ctrl = self.p_controller.update(error)
+        def f_right(error, speed, curr_time_) -> float:
+            # ctrl = self.p_controller.update(error)
+            ctrl = self.pd_controller.update(
+                error,
+                error - self.pd_controller.prev_r_error,
+                curr_time_ - self.pd_controller.prev_r_time
+            )
             # print("right ctrl: %f" % ctrl)
+            self.pd_controller.prev_r_error = error
+            self.pd_controller.prev_r_time = curr_time_
 
             return clamp(speed - ctrl, self.p_controller.range_min,
                          self.p_controller.range_max)
@@ -67,8 +81,8 @@ class Run:
             curr_state = self.sonar.get_distance()
             self.time.sleep(0.1)
 
-            vleft = f_left(goal - curr_state, vl)
-            vright = f_right(goal - curr_state, vr)
+            vleft = f_left(goal - curr_state, vl, curr_time)
+            vright = f_right(goal - curr_state, vr, curr_time)
             print("[curr_state = %f, error = %f\nleft: %f, right: %f]\n" % (
                 curr_state,
                 goal - curr_state,
