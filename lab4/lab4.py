@@ -95,8 +95,8 @@ class Run:
             # )
             # self.create.drive_direct(vleft, vright)
             self.create.drive_direct(
-                right_wheel_velocity_in_mm_per_sec=vright,
-                left_wheel_velocity_in_mm_per_sec=vleft
+                right_wheel_velocity_in_mm_per_sec=int(vright),
+                left_wheel_velocity_in_mm_per_sec=int(vleft)
             )
 
             # prev_time = curr_time
