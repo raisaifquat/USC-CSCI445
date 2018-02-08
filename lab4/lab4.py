@@ -38,20 +38,24 @@ class Run:
     def run(self):
         def f_left(error, speed) -> float:
             ctrl = self.p_controller.update(error)
-            if ctrl > 0:
+            if error > 0:
                 res = speed + ctrl
-            else:
+            elif error < 0:
                 res = speed - ctrl
+            else:
+                res = 100.0
 
             return clamp(res, self.p_controller.range_min,
                          self.p_controller.range_max)
 
         def f_right(error, speed) -> float:
             ctrl = self.p_controller.update(error)
-            if ctrl > 0:
+            if error > 0:
                 res = speed - ctrl
-            else:
+            elif error < 0:
                 res = speed + ctrl
+            else:
+                res = 100.0
 
             return clamp(res, self.p_controller.range_min,
                          self.p_controller.range_max)
@@ -59,7 +63,7 @@ class Run:
         self.create.start()
         self.create.safe()
 
-        self.servo.go_to(90)
+        self.servo.go_to(50)
         self.time.sleep(1)
 
         start_time = self.time.time()
@@ -73,8 +77,9 @@ class Run:
 
         # print(goal)
         goal = np.average(goal)
-        print(goal)
-        goal /= 2
+        # print(goal)/
+        # goal /= 4
+        # goal = 0.75
         print(goal)
 
         # l_goal = goal - robotProperties["wheel_base"]
@@ -91,21 +96,29 @@ class Run:
             # self.time.sleep(0.1)
 
             # self.servo.go_to(90)
+            # self.time.sleep(0.1)
             # curr_state = np.append(curr_state, self.sonar.get_distance())
             # self.time.sleep(0.1)
             #
             # self.servo.go_to(45)
+            # self.time.sleep(0.1)
             # curr_state = np.append(curr_state, self.sonar.get_distance())
             # self.time.sleep(0.1)
             #
             # self.servo.go_to(0)
+            # self.time.sleep(0.1)
             # curr_state = np.append(curr_state, self.sonar.get_distance())
             # self.time.sleep(0.1)
 
             # curr_state = np.min(curr_state)
             curr_state = self.sonar.get_distance()
             self.time.sleep(0.1)
-            print("[left: %f, right: %f]\n" % (f_left(goal - curr_state, vl), f_right(goal - curr_state, vr)))
+            print("[curr_state = %f, error = %f\nleft: %f, right: %f]\n" % (
+                curr_state,
+                goal - curr_state,
+                f_left(goal - curr_state, vl),
+                f_right(goal - curr_state, vr)
+            ))
             self.create.drive_direct(f_left(goal - curr_state, vl), f_right(goal - curr_state, vr))
 
             # prev_time = curr_time
