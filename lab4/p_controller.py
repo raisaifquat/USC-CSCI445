@@ -11,15 +11,6 @@ class PController:
         self.k_p = k_p
         pass
 
-    def update_left(self, goal: float, current_val: float) -> float:
-        error = goal - current_val
-        self.l_error = error
-
-        return clamp(current_val + error * self.k_p, self.range_min, self.range_max)
-
-    def update_right(self, goal: float, current_val: float) -> float:
-        error = goal - current_val
-        self.r_error = error
-
+    def update(self, error: float, current_val: float) -> float:
         return clamp(current_val + error * self.k_p, self.range_min, self.range_max)
 

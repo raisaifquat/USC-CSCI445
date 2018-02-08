@@ -23,6 +23,8 @@ class Run:
         """
         self.create = factory.create_create()
         self.time = factory.create_time_helper()
+        self.servo = factory.create_servo()
+        self.sonar = factory.create_sonar()
         self.odometry = Odometry(
             robotProperties["diameter_left"],
             robotProperties["diameter_right"],
@@ -33,69 +35,50 @@ class Run:
         self.pd_controller = PDController(k_p=1.5, k_d=0.0025)
 
     def run(self):
+        def f_left(error, speed) -> float:
+            return self.p_controller.update(error, speed)
+
+        def f_right(error, speed) -> float:
+            return self.p_controller.update(error, speed)
 
         self.create.start()
         self.create.safe()
 
         # request sensors
-        self.create.start_stream([
-            create2.Sensor.LeftEncoderCounts,
-            create2.Sensor.RightEncoderCounts,
-        ])
+        # self.create.start_stream([
+        #     create2.Sensor.LeftEncoderCounts,
+        #     create2.Sensor.RightEncoderCounts,
+        # ])
 
-        r_speed_arr = np.array([])
-        l_speed_arr = np.array([])
-        time_arr = np.array([])
-
-        v_left_goal = 100
-        v_right_goal = 100
-        v_left_update = 0
-        v_right_update = 0
+        self.servo.go_to(90)
+        self.time.sleep(1)
 
         start_time = self.time.time()
         curr_time = start_time
-        prev_time = curr_time
-        while curr_time - start_time < 20:
-            self.create.drive_direct(v_left_update, v_right_update)
-            state = self.create.update()
-            if state is not None:
-                # print(state.__dict__)
-                time_elapsed = curr_time - prev_time
-                self.odometry.update(state.rightEncoderCounts, state.leftEncoderCounts, time_elapsed)
-                # print("[x = %f, y = %f, angle = %f]" % (self.odometry.x,
-                #                                         self.odometry.y,
-                #                                         np.rad2deg(self.odometry.angle)))
-                # print("time_elapsed: %f\nr_speed: %f, l_speed: %f" % (
-                #     time_elapsed, self.odometry.r_speed, self.odometry.l_speed
-                # ))
-
-                # v_right_update = self.p_controller.update_right(v_right_goal, self.odometry.r_speed)
-                # v_left_update = self.p_controller.update_left(v_left_goal, self.odometry.l_speed)
-                v_right_update = self.pd_controller.update_right(v_right_goal, self.odometry.r_speed, curr_time)
-                v_left_update = self.pd_controller.update_left(v_left_goal, self.odometry.l_speed, curr_time)
-                # print("v_right_update: %f, v_left_update: %f\n" % (v_right_update, v_left_update))
-
-                time_arr = np.append(time_arr, curr_time)
-                r_speed_arr = np.append(r_speed_arr, self.odometry.r_speed)
-                l_speed_arr = np.append(l_speed_arr, self.odometry.l_speed)
-
-            prev_time = curr_time
+        goal = np.array([])
+        while curr_time - start_time < 2:
+            goal = np.append(goal, self.sonar.get_distance())
+            # print(self.sonar.get_distance())
+            self.time.sleep(0.1)
             curr_time = self.time.time()
 
-        plt.plot(time_arr, r_speed_arr)
-        # plt.plot(time_arr, l_speed_arr)
-        plt.xlabel('time')
-        plt.ylabel('right wheel speed')
-        plt.grid()
-        plt.show()
-        # file = open('output.txt', 'w')
-        # file.write("time_arr = np.array([")
-        # for i in range(0, len(time_arr)):
-        #     file.write("%f, " % time_arr[i])
-        # file.write("])\n")
-        #
-        # file.write("r_speed_arr = np.array([")
-        # for i in range(0, len(r_speed_arr)):
-        #     file.write("%f, " % time_arr[i])
-        # file.write("])")
-        # file.close()
+        print(goal)
+        goal = np.average(goal)
+        print(goal)
+
+        l_goal = goal - robotProperties["wheel_base"]
+        r_goal = goal + robotProperties["wheel_base"]
+        vl = 100.0
+        vr = 100.0
+
+        start_time = self.time.time()
+        curr_time = start_time
+        # prev_time = curr_time
+        while curr_time - start_time < 10:
+            curr_state = self.sonar.get_distance()
+            self.time.sleep(0.1)
+            print("[left: %f, right: %f]\n" % (f_left(l_goal - curr_state, vl), f_right(r_goal - curr_state, vr)))
+            self.create.drive_direct(f_left(goal - curr_state, vl), f_right(goal - curr_state, vr))
+
+            # prev_time = curr_time
+            curr_time = self.time.time()
