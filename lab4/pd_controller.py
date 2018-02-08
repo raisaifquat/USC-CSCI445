@@ -16,14 +16,9 @@ class PDController:
         self.prev_r_error = 0.0
         pass
 
-    def update_left(self, error: float, current_time: float) -> float:
-        delta_time = current_time - self.l_current_time
-        delta_error = error - self.l_error
+    def update(self, error: float, delta_error: float, delta_time: float) -> float:
 
         de_dt = 0.0 if delta_time == 0 else delta_error / delta_time
 
         # print("de/dt = %f" % de_dt)
-        self.l_error = error
-        self.l_current_time = current_time
-
-        return clamp(current_val + error * self.k_p + self.k_d * de_dt, self.range_min, self.range_max)
+        return error * self.k_p + self.k_d * de_dt
