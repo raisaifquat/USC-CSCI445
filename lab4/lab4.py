@@ -2,6 +2,7 @@ from pyCreate2 import create2
 from odometry import Odometry
 from p_controller import PController
 from pd_controller import PDController
+from utils import clamp
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -31,24 +32,32 @@ class Run:
             robotProperties["wheel_base"],
             robotProperties["encoder_count"]
         )
-        self.p_controller = PController(k_p=1.0)
+        self.p_controller = PController(k_p=50.0)
         self.pd_controller = PDController(k_p=1.5, k_d=0.0025)
 
     def run(self):
         def f_left(error, speed) -> float:
-            return self.p_controller.update(error, speed)
+            ctrl = self.p_controller.update(error)
+            if ctrl > 0:
+                res = speed + ctrl
+            else:
+                res = speed - ctrl
+
+            return clamp(res, self.p_controller.range_min,
+                         self.p_controller.range_max)
 
         def f_right(error, speed) -> float:
-            return self.p_controller.update(error, speed)
+            ctrl = self.p_controller.update(error)
+            if ctrl > 0:
+                res = speed - ctrl
+            else:
+                res = speed + ctrl
+
+            return clamp(res, self.p_controller.range_min,
+                         self.p_controller.range_max)
 
         self.create.start()
         self.create.safe()
-
-        # request sensors
-        # self.create.start_stream([
-        #     create2.Sensor.LeftEncoderCounts,
-        #     create2.Sensor.RightEncoderCounts,
-        # ])
 
         self.servo.go_to(90)
         self.time.sleep(1)
@@ -62,23 +71,42 @@ class Run:
             self.time.sleep(0.1)
             curr_time = self.time.time()
 
-        print(goal)
+        # print(goal)
         goal = np.average(goal)
         print(goal)
+        goal /= 2
+        print(goal)
 
-        l_goal = goal - robotProperties["wheel_base"]
-        r_goal = goal + robotProperties["wheel_base"]
+        # l_goal = goal - robotProperties["wheel_base"]
+        # r_goal = goal + robotProperties["wheel_base"]
         vl = 100.0
         vr = 100.0
 
         start_time = self.time.time()
         curr_time = start_time
         # prev_time = curr_time
-        while curr_time - start_time < 10:
+        curr_state = np.array([])
+        while curr_time - start_time < 100:
+            # self.create.drive_direct(0, 0)
+            # self.time.sleep(0.1)
+
+            # self.servo.go_to(90)
+            # curr_state = np.append(curr_state, self.sonar.get_distance())
+            # self.time.sleep(0.1)
+            #
+            # self.servo.go_to(45)
+            # curr_state = np.append(curr_state, self.sonar.get_distance())
+            # self.time.sleep(0.1)
+            #
+            # self.servo.go_to(0)
+            # curr_state = np.append(curr_state, self.sonar.get_distance())
+            # self.time.sleep(0.1)
+
+            # curr_state = np.min(curr_state)
             curr_state = self.sonar.get_distance()
             self.time.sleep(0.1)
-            print("[left: %f, right: %f]\n" % (f_left(l_goal - curr_state, vl), f_right(r_goal - curr_state, vr)))
-            self.create.drive_direct(f_left(l_goal - curr_state, vl), f_right(r_goal - curr_state, vr))
+            print("[left: %f, right: %f]\n" % (f_left(goal - curr_state, vl), f_right(goal - curr_state, vr)))
+            self.create.drive_direct(f_left(goal - curr_state, vl), f_right(goal - curr_state, vr))
 
             # prev_time = curr_time
             curr_time = self.time.time()
