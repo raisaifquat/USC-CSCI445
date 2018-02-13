@@ -52,8 +52,8 @@ class Run:
             create2.Sensor.RightEncoderCounts,
         ])
 
-        speed = 300  # mm/s
-        time_90deg_turn = 1.9 / speed * 100.0  # seconds
+        speed = 100  # mm/s
+        time_90deg_turn = 1.9 / (speed / 100.0)  # seconds
 
         # move forward for 1m
         self.create.drive_direct(speed, speed)
@@ -87,9 +87,9 @@ class Run:
         self.create.stop()
 
         plt.plot(self.time_arr, self.x_arr, label='x coor measured')
-        plt.plot(self.time_arr, self.x_arr_truth, label='x coor truth')
+        plt.plot(self.time_arr, self.x_arr_truth, '--', label='x coor truth')
         plt.plot(self.time_arr, self.y_arr, label='y coor measured')
-        plt.plot(self.time_arr, self.y_arr_truth, label='y coor truth')
+        plt.plot(self.time_arr, self.y_arr_truth, '--', label='y coor truth')
         plt.legend()
         plt.grid()
         plt.show()
