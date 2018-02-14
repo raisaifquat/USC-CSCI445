@@ -89,13 +89,13 @@ class Run:
         x_offset = self.x_arr_truth[np.argwhere(self.time_arr > 0.05)[0]]
         y_offset = self.y_arr_truth[np.argwhere(self.time_arr > 0.05)[0]]
 
-        plt.plot(self.time_arr, self.x_arr + x_offset, label='x coor measured')
-        plt.plot(self.time_arr, self.x_arr_truth, '--', label='x coor truth')
-        plt.plot(self.time_arr, self.y_arr + y_offset, label='y coor measured')
-        plt.plot(self.time_arr, self.y_arr_truth, '--', label='y coor truth')
+        # plt.plot(self.time_arr, self.x_arr + x_offset, label='x coor measured')
+        # plt.plot(self.time_arr, self.x_arr_truth, '--', label='x coor truth')
+        # plt.plot(self.time_arr, self.y_arr + y_offset, label='y coor measured')
+        # plt.plot(self.time_arr, self.y_arr_truth, '--', label='y coor truth')
 
-        # plt.plot(self.x_arr + x_offset, self.y_arr + y_offset, label='coor measured')
-        # plt.plot(self.x_arr_truth, self.y_arr_truth, '--', label='coor truth')
+        plt.plot(self.x_arr + x_offset, self.y_arr + y_offset, label='coor measured')
+        plt.plot(self.x_arr_truth, self.y_arr_truth, '--', label='coor truth')
         plt.legend()
         plt.grid()
         plt.show()
