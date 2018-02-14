@@ -20,8 +20,8 @@ class Run:
 
         self.odometry = Odometry()
         self.pd_controller = PDController(500, 100, -75, 75)
-        self.pid_controller = PIDController(100, 20, 0.02, -75, 75, -100, 100)
         # self.pid_controller = PIDController(500, 100, 0, -75, 75, -50, 50)
+        self.pid_controller = PIDController(100, 20, 0.02, -75, 75, -100, 100)
 
     def sleep(self, time_in_sec):
         """Sleeps for the specified amount of time while keeping odometry up-to-date
