@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 
 from odometry import Odometry
 from pd_controller import PDController
+from pid_controller import PIDController
 
 
 class Run:
@@ -18,7 +19,8 @@ class Run:
         self.time = factory.create_time_helper()
 
         self.odometry = Odometry()
-        self.pd_controller = PDController(1000, 100, -75, 75)
+        self.pd_controller = PDController(500, 100, -75, 75)
+        self.pid_controller = PIDController(500, 100, 20, -75, 75)
 
     def sleep(self, time_in_sec):
         """Sleeps for the specified amount of time while keeping odometry up-to-date
@@ -52,17 +54,21 @@ class Run:
         base_speed = 0
 
         angle = self.odometry.theta
-        while angle < goal_angle:
+        plt_time_arr = np.append(plt_time_arr, self.time.time())
+        plt_angle_arr = np.append(plt_angle_arr, angle)
+
+        # while angle < goal_angle:
+        while self.time.time() < 10:
+            angle = self.odometry.theta
             plt_time_arr = np.append(plt_time_arr, self.time.time())
             plt_angle_arr = np.append(plt_angle_arr, angle)
 
-            output = self.pd_controller.update(angle, goal_angle, self.time.time())
+            # output = self.pd_controller.update(angle, goal_angle, self.time.time())
+            output = self.pid_controller.update(angle, goal_angle, self.time.time())
             # print("angle =%f, output = %f" % (np.rad2deg(angle), output))
             # print("[r = %f, l = %f]\n" % (int(base_speed + output), int(base_speed - output)))
             self.create.drive_direct(int(base_speed + output), int(base_speed - output))
             self.sleep(0.01)
-
-            angle = self.odometry.theta
 
         plt.title("Time vs Angle")
         plt.xlabel("Time (in second)")
