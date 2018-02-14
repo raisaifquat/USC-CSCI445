@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from odometry import Odometry
 from pd_controller import PDController
 from pid_controller import PIDController
+from utils import dist
 
 
 class Run:
@@ -51,18 +52,24 @@ class Run:
         plt_time_arr = np.array([])
         plt_angle_arr = np.array([])
 
-        goal_angle = np.pi / 2
-        base_speed = 0
-        timeout = 17 * (goal_angle / np.pi) + 2
+        goal_coor = np.array([-3, 1])
+        base_speed = 100
 
         angle = self.odometry.theta
+        goal_angle = angle + np.arctan((goal_coor[1] - self.odometry.y) / (goal_coor[0] - self.odometry.x))
         plt_time_arr = np.append(plt_time_arr, self.time.time())
         plt_angle_arr = np.append(plt_angle_arr, angle)
 
-        while self.time.time() < timeout:
+        print(goal_angle)
+        print(np.rad2deg(goal_angle))
+
+        # while self.time.time() < timeout:
+        while True:
             angle = self.odometry.theta
             plt_time_arr = np.append(plt_time_arr, self.time.time())
             plt_angle_arr = np.append(plt_angle_arr, angle)
+
+            print("dist = %f\n" % dist(goal_coor, np.array([self.odometry.x, self.odometry.y])))
 
             # output = self.pd_controller.update(angle, goal_angle, self.time.time())
             output = self.pid_controller.update(angle, goal_angle, self.time.time())

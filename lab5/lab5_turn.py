@@ -51,9 +51,9 @@ class Run:
         plt_time_arr = np.array([])
         plt_angle_arr = np.array([])
 
-        goal_angle = np.pi / 2
+        goal_angle = - np.pi / 2
         base_speed = 0
-        timeout = 17 * (goal_angle / np.pi) + 2
+        timeout = abs(17 * (goal_angle / np.pi)) + 2
 
         angle = self.odometry.theta
         plt_time_arr = np.append(plt_time_arr, self.time.time())
