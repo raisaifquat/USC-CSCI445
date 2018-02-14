@@ -8,9 +8,8 @@ class Run:
         self.time = factory.create_time_helper()
         self.sonar = factory.create_sonar()
         self.servo = factory.create_servo()
-        #self.p_controller = p_controller.PController(1000, -75, 75)
+        # self.p_controller = p_controller.PController(1000, -75, 75)
         self.pd_controller = pd_controller.PDController(1000, 100, -75, 75)
-
 
     def run(self):
         self.create.start()
@@ -26,7 +25,7 @@ class Run:
             distance = self.sonar.get_distance()
             if distance is not None:
                 print(distance)
-                #output = self.p_controller.update(distance, goal_distance)
+                # output = self.p_controller.update(distance, goal_distance)
                 output = self.pd_controller.update(distance, goal_distance, self.time.time())
                 self.create.drive_direct(int(base_speed - output), int(base_speed + output))
                 self.time.sleep(0.01)
