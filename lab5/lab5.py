@@ -20,7 +20,8 @@ class Run:
 
         self.odometry = Odometry()
         self.pd_controller = PDController(500, 100, -75, 75)
-        self.pid_controller = PIDController(100, 20, 0.025, -75, 75, -50, 50)
+        self.pid_controller = PIDController(100, 20, 0.01, -75, 75, -100, 100)
+        # self.pid_controller = PIDController(500, 100, 0, -75, 75, -50, 50)
 
     def sleep(self, time_in_sec):
         """Sleeps for the specified amount of time while keeping odometry up-to-date
@@ -50,15 +51,16 @@ class Run:
         plt_time_arr = np.array([])
         plt_angle_arr = np.array([])
 
-        goal_angle = np.pi
+        goal_angle = np.pi / 2
         base_speed = 0
+        timeout = 17 * (goal_angle / np.pi) + 2
 
         angle = self.odometry.theta
         plt_time_arr = np.append(plt_time_arr, self.time.time())
         plt_angle_arr = np.append(plt_angle_arr, angle)
 
         # while angle < goal_angle:
-        while self.time.time() < 17:
+        while self.time.time() < timeout:
             angle = self.odometry.theta
             plt_time_arr = np.append(plt_time_arr, self.time.time())
             plt_angle_arr = np.append(plt_angle_arr, angle)
