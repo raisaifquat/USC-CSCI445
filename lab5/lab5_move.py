@@ -56,8 +56,6 @@ class Run:
         goal_y = 1
         goal_coor = np.array([goal_x, goal_y])
         base_speed = 100
-        v_left = base_speed
-        v_right = base_speed
 
         angle = self.odometry.theta
         goal_angle = np.rad2deg(np.arctan2(goal_y, goal_x))
@@ -78,13 +76,10 @@ class Run:
 
             # output = self.pd_controller.update(angle, goal_angle, self.time.time())
             output = self.pid_controller.update(angle, goal_angle, self.time.time())
+
             print("angle =%f, output = %f" % (np.rad2deg(angle), output))
-            v_right = clamp(v_right + output, -300, 300)
-            v_left = clamp(v_left - output, -300, 300)
-            # print("[r = %f, l = %f]\n" % (int(base_speed + output), int(base_speed - output)))
-            # self.create.drive_direct(int(base_speed + output), int(base_speed - output))
-            print("[r = %f, l = %f]\n" % (int(v_right), int(v_left)))
-            self.create.drive_direct(int(v_left), int(v_left))
+            print("[r = %f, l = %f]\n" % (int(base_speed + output), int(base_speed - output)))
+            self.create.drive_direct(int(base_speed + output), int(base_speed - output))
             self.sleep(0.01)
 
         plt.title("Time vs Angle")
