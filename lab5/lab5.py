@@ -1,8 +1,10 @@
 from pyCreate2 import create2
 
 import numpy as np
+import matplotlib.pyplot as plt
 
 from odometry import Odometry
+from pd_controller import PDController
 
 
 class Run:
@@ -14,7 +16,9 @@ class Run:
         """
         self.create = factory.create_create()
         self.time = factory.create_time_helper()
+
         self.odometry = Odometry()
+        self.pd_controller = PDController(1000, 100, -75, 75)
 
     def sleep(self, time_in_sec):
         """Sleeps for the specified amount of time while keeping odometry up-to-date
@@ -26,7 +30,7 @@ class Run:
             state = self.create.update()
             if state is not None:
                 self.odometry.update(state.leftEncoderCounts, state.rightEncoderCounts)
-                print("[{},{},{}]".format(self.odometry.x, self.odometry.y, np.rad2deg(self.odometry.theta)))
+                # print("[{},{},{}]".format(self.odometry.x, self.odometry.y, np.rad2deg(self.odometry.theta)))
             t = self.time.time()
             if start + time_in_sec <= t:
                 break
@@ -41,9 +45,31 @@ class Run:
             create2.Sensor.RightEncoderCounts,
         ])
 
-        self.create.drive_direct(100, 100)
-        self.sleep(5)
-        self.create.drive_direct(100, -100)
-        self.sleep(2.0)
-        self.create.drive_direct(-100, -100)
-        self.sleep(5)
+        plt_time_arr = np.array([])
+        plt_angle_arr = np.array([])
+
+        goal_angle = np.pi
+        base_speed = 0
+
+        angle = self.odometry.theta
+        while angle < goal_angle:
+            plt_time_arr = np.append(plt_time_arr, self.time.time())
+            plt_angle_arr = np.append(plt_angle_arr, angle)
+
+            output = self.pd_controller.update(angle, goal_angle, self.time.time())
+            # print("angle =%f, output = %f" % (np.rad2deg(angle), output))
+            # print("[r = %f, l = %f]\n" % (int(base_speed + output), int(base_speed - output)))
+            self.create.drive_direct(int(base_speed + output), int(base_speed - output))
+            self.sleep(0.01)
+
+            angle = self.odometry.theta
+
+        plt.title("Time vs Angle")
+        plt.xlabel("Time (in second)")
+        plt.ylabel("Angle (in radian)")
+
+        plt.axhline(y=goal_angle, color='r', linestyle='--', label='Target angle')
+        plt.plot(plt_time_arr, plt_angle_arr, label='Actual angle')
+        plt.legend()
+        plt.grid()
+        plt.show()

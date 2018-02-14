@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import math
+from utils import clamp
 
 
 class PDController:
@@ -22,4 +22,5 @@ class PDController:
         output = p + d
         self.previousTime = time
         self.previousError = error
-        return max(min(output, self.maxOutput), self.minOutput)
+
+        return clamp(output, self.minOutput, self.maxOutput)
