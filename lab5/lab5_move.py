@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from odometry import Odometry
 from pd_controller import PDController
 from pid_controller import PIDController
-from utils import dist
+from utils import dist, clamp
 
 
 class Run:
@@ -21,8 +21,8 @@ class Run:
 
         self.odometry = Odometry()
         self.pd_controller = PDController(500, 100, -75, 75)
-        # self.pid_controller = PIDController(500, 100, 0, -75, 75, -50, 50)
-        self.pid_controller = PIDController(100, 20, 0.02, -75, 75, -100, 100)
+        self.pid_controller = PIDController(500, 100, 0, -75, 75, -50, 50)
+        # self.pid_controller = PIDController(100, 20, 0.02, -75, 75, -100, 100)
 
     def sleep(self, time_in_sec):
         """Sleeps for the specified amount of time while keeping odometry up-to-date
@@ -52,11 +52,15 @@ class Run:
         plt_time_arr = np.array([])
         plt_angle_arr = np.array([])
 
-        goal_coor = np.array([-3, 1])
+        goal_x = -3
+        goal_y = 1
+        goal_coor = np.array([goal_x, goal_y])
         base_speed = 100
+        v_left = base_speed
+        v_right = base_speed
 
         angle = self.odometry.theta
-        goal_angle = angle + np.arctan((goal_coor[1] - self.odometry.y) / (goal_coor[0] - self.odometry.x))
+        goal_angle = np.rad2deg(np.arctan2(goal_y, goal_x))
         plt_time_arr = np.append(plt_time_arr, self.time.time())
         plt_angle_arr = np.append(plt_angle_arr, angle)
 
@@ -69,13 +73,18 @@ class Run:
             plt_time_arr = np.append(plt_time_arr, self.time.time())
             plt_angle_arr = np.append(plt_angle_arr, angle)
 
-            print("dist = %f\n" % dist(goal_coor, np.array([self.odometry.x, self.odometry.y])))
+            # print("dist = %f\n" % dist(goal_coor, np.array([self.odometry.x, self.odometry.y])))
+            # print("angle = %f\n" % np.rad2deg(angle))
 
             # output = self.pd_controller.update(angle, goal_angle, self.time.time())
             output = self.pid_controller.update(angle, goal_angle, self.time.time())
-            # print("angle =%f, output = %f" % (np.rad2deg(angle), output))
+            print("angle =%f, output = %f" % (np.rad2deg(angle), output))
+            v_right = clamp(v_right + output, -300, 300)
+            v_left = clamp(v_left - output, -300, 300)
             # print("[r = %f, l = %f]\n" % (int(base_speed + output), int(base_speed - output)))
-            self.create.drive_direct(int(base_speed + output), int(base_speed - output))
+            # self.create.drive_direct(int(base_speed + output), int(base_speed - output))
+            print("[r = %f, l = %f]\n" % (int(v_right), int(v_left)))
+            self.create.drive_direct(int(v_left), int(v_left))
             self.sleep(0.01)
 
         plt.title("Time vs Angle")
