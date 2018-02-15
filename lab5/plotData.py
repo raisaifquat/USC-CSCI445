@@ -24,8 +24,8 @@ def plot_angle_vs_goal_angle():
     plt_goal_angle_arr = np.genfromtxt('goalAngleOutput.csv', delimiter=',')
 
     plt.title("Angle vs Goal Angle")
-    plt.xlabel("Goal Angle (in radian)")
-    plt.ylabel("Angle (in radian)")
+    plt.xlabel("Angle (in radian)")
+    plt.ylabel("Goal Angle (in radian)")
 
     plt.plot(plt_angle_arr, plt_goal_angle_arr, label='Actual angle')
     plt.legend()
