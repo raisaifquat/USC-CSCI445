@@ -38,6 +38,7 @@ class Run:
                 break
 
     def run(self):
+        print("run")
         self.create.start()
         self.create.safe()
 
@@ -46,6 +47,7 @@ class Run:
             create2.Sensor.LeftEncoderCounts,
             create2.Sensor.RightEncoderCounts,
         ])
+        print("init")
 
         plt_time_arr = np.array([])
         plt_angle_arr = np.array([])
@@ -58,19 +60,11 @@ class Run:
         angle = self.odometry.theta
         plt_time_arr = np.append(plt_time_arr, self.time.time())
         plt_angle_arr = np.append(plt_angle_arr, angle)
+        print("about to while loop")
 
         while self.time.time() < timeout:
-            angle = self.odometry.theta
-            plt_time_arr = np.append(plt_time_arr, self.time.time())
-            plt_angle_arr = np.append(plt_angle_arr, angle)
-
-            # output = self.pd_controller.update(angle, goal_angle, self.time.time())
-            output = self.pid_controller.update(angle, goal_angle, self.time.time())
-            # print("angle =%f, output = %f" % (np.rad2deg(angle), output))
-            # print("[r = %f, l = %f]\n" % (int(base_speed + output), int(base_speed - output)))
-            self.create.drive_direct(int(base_speed + output), int(base_speed - output))
+            self.create.drive_direct(100, 100)
             self.sleep(0.01)
 
         np.savetxt("timeOutput.csv", plt_time_arr, delimiter=",")
         np.savetxt("angleOutput.csv", plt_angle_arr, delimiter=",")
-
