@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 from odometry import Odometry
 from pd_controller import PDController
 from pid_controller import PIDController
-from utils import dist, clamp
 
 
 class Run:
@@ -21,8 +20,8 @@ class Run:
 
         self.odometry = Odometry()
         self.pd_controller = PDController(500, 100, -75, 75)
-        self.pid_controller = PIDController(30, 10, 0, -100, 100, -50, 50)
-        # self.pid_controller = PIDController(100, 20, 0.02, -75, 75, -100, 100)
+        # self.pid_controller = PIDController(500, 100, 0, -75, 75, -50, 50)
+        self.pid_controller = PIDController(250, 40, 0.02, -75, 75, -100, 100)
 
     def sleep(self, time_in_sec):
         """Sleeps for the specified amount of time while keeping odometry up-to-date
@@ -52,33 +51,24 @@ class Run:
         plt_time_arr = np.array([])
         plt_angle_arr = np.array([])
 
-        goal_x = -3
-        goal_y = 1
-        goal_coor = np.array([goal_x, goal_y])
-        base_speed = 100
+        goal_angle = np.pi / 2
+        goal_angle %= 2 * np.pi
+        base_speed = 0
+        timeout = abs(17 * (goal_angle / np.pi)) + 1
 
         angle = self.odometry.theta
-        goal_angle = np.rad2deg(np.arctan2(goal_y, goal_x))
         plt_time_arr = np.append(plt_time_arr, self.time.time())
         plt_angle_arr = np.append(plt_angle_arr, angle)
 
-        print(goal_angle)
-        print(np.rad2deg(goal_angle))
-
-        # while self.time.time() < timeout:
-        while True:
+        while self.time.time() < timeout:
             angle = self.odometry.theta
             plt_time_arr = np.append(plt_time_arr, self.time.time())
             plt_angle_arr = np.append(plt_angle_arr, angle)
 
-            # print("dist = %f\n" % dist(goal_coor, np.array([self.odometry.x, self.odometry.y])))
-            # print("angle = %f\n" % np.rad2deg(angle))
-
             # output = self.pd_controller.update(angle, goal_angle, self.time.time())
             output = self.pid_controller.update(angle, goal_angle, self.time.time())
-
-            print("angle =%f, output = %f" % (np.rad2deg(angle), output))
-            print("[r = %f, l = %f]\n" % (int(base_speed + output), int(base_speed - output)))
+            # print("angle =%f, output = %f" % (np.rad2deg(angle), output))
+            # print("[r = %f, l = %f]\n" % (int(base_speed + output), int(base_speed - output)))
             self.create.drive_direct(int(base_speed + output), int(base_speed - output))
             self.sleep(0.01)
 
