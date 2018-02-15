@@ -82,12 +82,5 @@ class Run:
             self.create.drive_direct(int(base_speed + output), int(base_speed - output))
             self.sleep(0.01)
 
-        plt.title("Time vs Angle")
-        plt.xlabel("Time (in second)")
-        plt.ylabel("Angle (in radian)")
-
-        plt.axhline(y=goal_angle, color='r', linestyle='--', label='Target angle')
-        plt.plot(plt_time_arr, plt_angle_arr, label='Actual angle')
-        plt.legend()
-        plt.grid()
-        plt.show()
+        np.savetxt("timeOutput.csv", plt_time_arr, delimiter=",")
+        np.savetxt("angleOutput.csv", plt_angle_arr, delimiter=",")
