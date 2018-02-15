@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from odometry import Odometry
 from pd_controller import PDController
 from pid_controller import PIDController
+from utils import dist
 
 
 class Run:
@@ -21,7 +22,7 @@ class Run:
         self.odometry = Odometry()
         self.pd_controller = PDController(500, 100, -75, 75)
         # self.pid_controller = PIDController(500, 100, 0, -75, 75, -50, 50)
-        self.pid_controller = PIDController(250, 40, 0.02, -75, 75, -100, 100)
+        self.pid_controller = PIDController(250, 40, 1, -100, 100, -100, 100)
 
     def sleep(self, time_in_sec):
         """Sleeps for the specified amount of time while keeping odometry up-to-date
@@ -51,19 +52,25 @@ class Run:
         plt_time_arr = np.array([])
         plt_angle_arr = np.array([])
 
-        goal_x = -1
-        goal_y = 1
+        goal_x = -5
+        goal_y = -6
+        goal_coor = np.array([goal_x, goal_y])
         goal_angle = np.arctan2(goal_y, goal_x)
         goal_angle %= 2 * np.pi
-        # print("goal angle = %f\n" % np.rad2deg(goal_angle))
+        print("goal angle = %f" % np.rad2deg(goal_angle))
         base_speed = 100
-        timeout = abs(17 * (goal_angle / np.pi)) + 1
+        # timeout = abs(17 * (goal_angle / np.pi)) + 1
+        goal_r = 0.28
 
         angle = self.odometry.theta
+        dist_to_goal = dist(goal_coor, np.array([self.odometry.x, self.odometry.y]))
+
         plt_time_arr = np.append(plt_time_arr, self.time.time())
         plt_angle_arr = np.append(plt_angle_arr, angle)
 
-        while self.time.time() < timeout:
+        while abs(dist_to_goal) > goal_r:
+            print("(%f, %f), dist to goal = %f\n" % (self.odometry.x, self.odometry.y, dist_to_goal))
+            dist_to_goal = dist(goal_coor, np.array([self.odometry.x, self.odometry.y]))
             angle = self.odometry.theta
             plt_time_arr = np.append(plt_time_arr, self.time.time())
             plt_angle_arr = np.append(plt_angle_arr, angle)
