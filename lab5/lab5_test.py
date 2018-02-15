@@ -27,8 +27,10 @@ class Run:
         Args:
             time_in_sec (float): time to sleep in seconds
         """
+        print("inside sleep()")
         start = self.time.time()
         while True:
+            print("inside sleep() while")
             state = self.create.update()
             if state is not None:
                 self.odometry.update(state.leftEncoderCounts, state.rightEncoderCounts)
@@ -37,8 +39,11 @@ class Run:
             if start + time_in_sec <= t:
                 break
 
+        print("about to leave sleep()")
+
     def run(self):
         print("run")
+        self.create.reset()
         self.create.start()
         self.create.safe()
 
@@ -56,15 +61,21 @@ class Run:
         goal_angle %= 2 * np.pi
         base_speed = 0
         timeout = abs(17 * (goal_angle / np.pi)) + 1
+        print("timeout = %f" % timeout)
 
         angle = self.odometry.theta
         plt_time_arr = np.append(plt_time_arr, self.time.time())
         plt_angle_arr = np.append(plt_angle_arr, angle)
         print("about to while loop")
 
-        while self.time.time() < timeout:
+        start_time = self.time.time()
+        print("current time = %f" % self.time.time())
+        while self.time.time() - start_time < timeout:
+            print("inside while")
             self.create.drive_direct(100, 100)
             self.sleep(0.01)
+
+        print("outside while")
 
         np.savetxt("timeOutput.csv", plt_time_arr, delimiter=",")
         np.savetxt("angleOutput.csv", plt_angle_arr, delimiter=",")

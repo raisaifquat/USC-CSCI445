@@ -59,7 +59,8 @@ class Run:
         plt_time_arr = np.append(plt_time_arr, self.time.time())
         plt_angle_arr = np.append(plt_angle_arr, angle)
 
-        while self.time.time() < timeout:
+        start_time = self.time.time()
+        while self.time.time() - start_time < timeout:
             angle = self.odometry.theta
             plt_time_arr = np.append(plt_time_arr, self.time.time())
             plt_angle_arr = np.append(plt_angle_arr, angle)
