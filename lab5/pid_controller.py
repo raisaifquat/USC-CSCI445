@@ -23,11 +23,12 @@ class PIDController:
 
         p = self.kp * error
         d = 0
+        i = 0
         if self.previousTime is not None:
             dt = time - self.previousTime
             if dt > 0:
                 d = self.kd * (error - self.previousError) / dt
-        i = self.ki * self.error_integral
+            i = self.ki * self.error_integral * dt
 
         output = p + d + i
         self.previousTime = time
