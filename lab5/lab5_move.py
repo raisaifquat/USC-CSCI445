@@ -84,12 +84,19 @@ class Run:
             # output = self.pd_controller.update(angle, goal_angle, self.time.time())
             output = self.pid_controller.update(angle, goal_angle, self.time.time())
             output_dist = self.pid_controller_dist.update(0, dist_to_goal, self.time.time())
-            # print("angle =%f, output = %f" % (np.rad2deg(angle), output))
-            # print("[r = %f, l = %f]\n" % (int(base_speed + output), int(base_speed - output)))
+
             self.create.drive_direct(
-                int(output_dist + output),
-                int(output_dist - output)
+                int(base_speed + output),
+                int(base_speed - output)
             )
+            # self.create.drive_direct(
+            #     int((dist_to_goal * base_speed) + output),
+            #     int((dist_to_goal * base_speed) - output)
+            # )
+            # self.create.drive_direct(
+            #     int(output_dist + output),
+            #     int(output_dist - output)
+            # )
             self.sleep(0.01)
 
         np.savetxt("timeOutput.csv", plt_time_arr, delimiter=",")

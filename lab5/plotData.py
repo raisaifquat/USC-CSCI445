@@ -33,4 +33,5 @@ def plot_angle_vs_goal_angle():
     plt.show()
 
 
-plot_angle_vs_goal_angle()
+# plot_angle_vs_goal_angle()
+plot_time_vs_angle()
