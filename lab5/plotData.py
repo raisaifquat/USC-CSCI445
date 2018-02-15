@@ -1,7 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def plotTimeVSAngle():
+
+def plot_time_vs_angle():
     goal_angle = np.pi / 2
 
     plt_time_arr = np.genfromtxt('timeOutput.csv', delimiter=',')
@@ -22,11 +23,11 @@ def plot_angle_vs_goal_angle():
     plt_angle_arr = np.genfromtxt('angleOutput.csv', delimiter=',')
     plt_goal_angle_arr = np.genfromtxt('goalAngleOutput.csv', delimiter=',')
 
-    plt.title("Goal Angle vs Angle")
+    plt.title("Angle vs Goal Angle")
     plt.xlabel("Goal Angle (in radian)")
     plt.ylabel("Angle (in radian)")
 
-    plt.plot(plt_goal_angle_arr, plt_angle_arr, label='Actual angle')
+    plt.plot(plt_angle_arr, plt_goal_angle_arr, label='Actual angle')
     plt.legend()
     plt.grid()
     plt.show()

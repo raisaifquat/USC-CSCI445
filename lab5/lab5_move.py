@@ -23,6 +23,7 @@ class Run:
         self.pd_controller = PDController(500, 100, -75, 75)
         # self.pid_controller = PIDController(500, 100, 0, -75, 75, -50, 50)
         self.pid_controller = PIDController(500, 100, 10, -100, 100, -100, 100)
+        self.pid_controller_dist = PIDController(500, 100, 10, -100, 100, -100, 100)
 
     def sleep(self, time_in_sec):
         """Sleeps for the specified amount of time while keeping odometry up-to-date
@@ -61,7 +62,7 @@ class Run:
         print("goal angle = %f" % np.rad2deg(goal_angle))
         base_speed = 100
         # timeout = abs(17 * (goal_angle / np.pi)) + 1
-        goal_r = 0.29
+        goal_r = 0.05
 
         angle = self.odometry.theta
         dist_to_goal = dist(goal_coor, np.array([self.odometry.x, self.odometry.y]))
@@ -76,17 +77,18 @@ class Run:
             print("(%f, %f), dist to goal = %f\n" % (self.odometry.x, self.odometry.y, dist_to_goal))
             dist_to_goal = dist(goal_coor, np.array([self.odometry.x, self.odometry.y]))
             angle = self.odometry.theta
-            plt_time_arr = np.append(plt_time_arr, self.time.time())
+
             plt_angle_arr = np.append(plt_angle_arr, angle)
             plt_goal_angle_arr = np.append(plt_goal_angle_arr, goal_angle)
 
             # output = self.pd_controller.update(angle, goal_angle, self.time.time())
             output = self.pid_controller.update(angle, goal_angle, self.time.time())
+            output_dist = self.pid_controller_dist.update(0, dist_to_goal, self.time.time())
             # print("angle =%f, output = %f" % (np.rad2deg(angle), output))
             # print("[r = %f, l = %f]\n" % (int(base_speed + output), int(base_speed - output)))
             self.create.drive_direct(
-                int((dist_to_goal * base_speed) + output),
-                int((dist_to_goal * base_speed) - output)
+                int(output_dist + output),
+                int(output_dist - output)
             )
             self.sleep(0.01)
 
