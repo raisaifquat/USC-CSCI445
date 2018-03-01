@@ -109,13 +109,8 @@ class Run:
             goal_x = point[0]
             goal_y = point[1]
             base_speed = 100
-            curr_state = State.update
 
             print("Going to @{%.4f, %.4f}" % (goal_x, goal_y))
-            # dist_to_wall = self.sweep_sonar(10, sleep_time=0.05)
-            # dist_to_wall = self.sonar.get_distance()
-            curr_angle = math.degrees(self.odometry.theta)
-            prev_dist_to_goal = self.dist_to_goal(goal_x, goal_y)
 
             while self.dist_to_goal(goal_x, goal_y) > dist_threshold:
                 dist_to_wall = self.dist_to_wall()
