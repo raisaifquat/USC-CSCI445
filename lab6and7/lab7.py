@@ -25,6 +25,20 @@ class Run:
         self.pidDistance = pid_controller.PIDController(1000, 0, 50, [0, 0], [-200, 200], is_angle=False)
         self.pd_controller = pid_controller.PIDController(1000, 0, 100, [-75, 75], [-200, 200], is_angle=False)
 
+    def sleep(self, time_in_sec, action=None, action_args=None):
+        start = self.time.time()
+        while self.time.time() - start < time_in_sec:
+            state = self.create.update()
+            if action is not None:
+                if action_args is None:
+                    action()
+                else:
+                    action(action_args)
+
+            if state is not None:
+                self.odometry.update(state.leftEncoderCounts, state.rightEncoderCounts)
+                # print("[{},{},{}]".format(self.odometry.x, self.odometry.y, math.degrees(self.odometry.theta)))
+
     def go_to_goal(self, goal_x, goal_y):
         state = self.create.update()
         if state is not None:
@@ -47,15 +61,35 @@ class Run:
         return self.sonar.get_distance()
 
     def follow_wall(self, goal_dist, base_speed: float = 100.0):
-        state = self.create.update()
-        if state is not None:
-            self.odometry.update(state.leftEncoderCounts, state.rightEncoderCounts)
         distance = self.sonar.get_distance()
         if distance is not None:
             # print(distance)
             output = self.pd_controller.update(distance, goal_dist, self.time.time())
             self.create.drive_direct(int(base_speed - output), int(base_speed + output))
-            self.time.sleep(0.01)
+            self.sleep(0.01)
+
+    def sweep_sonar(self, degree) -> float:
+        min_dist_to_wall = self.sonar.get_distance()
+        print(min_dist_to_wall)
+
+        curr_angle = math.degrees(self.odometry.theta)
+
+        self.servo.go_to(curr_angle - degree)
+        self.sleep(1, self.servo.go_to, curr_angle - degree)
+        dist_to_wall = self.sonar.get_distance()
+        if dist_to_wall < min_dist_to_wall:
+            min_dist_to_wall = dist_to_wall
+
+        self.servo.go_to(curr_angle + degree)
+        self.sleep(1, self.servo.go_to, curr_angle + degree)
+        min_dist_to_wall = self.sonar.get_distance()
+        if dist_to_wall < min_dist_to_wall:
+            min_dist_to_wall = dist_to_wall
+
+        self.servo.go_to(curr_angle)
+        self.sleep(1, self.servo.go_to, curr_angle)
+
+        return min_dist_to_wall
 
     def run(self):
         self.create.start()
@@ -85,10 +119,14 @@ class Run:
             print("Going to @{%.4f, %.4f}" % (goal_x, goal_y))
 
             while self.dist_to_goal(goal_x, goal_y) > dist_threshold:
-
-                dist_to_wall = self.dist_to_wall()
+                dist_to_wall = self.sweep_sonar(10)
+                cnt = 0
                 while dist_to_wall is not None and dist_to_wall > wall_threshold:
                     # print(dist_to_wall)
+                    if cnt == 0:
+                        print("\ngo to goal!")
+                    cnt += 1
+
                     self.go_to_goal(goal_x, goal_y)
                     dist_to_wall = self.dist_to_wall()
 
@@ -96,13 +134,19 @@ class Run:
                 sonar_angle = math.degrees(self.odometry.theta)
                 print("dist to goal = %f\n" % original_dist_to_goal)
                 while self.dist_to_goal(goal_x, goal_y) - original_dist_to_goal < distance_offset:
-                    self.follow_wall(wall_threshold + 0.1, base_speed=base_speed)
+                    if cnt == 0:
+                        print("\nfollowing wall!")
+                    cnt += 1
+                    self.follow_wall(wall_threshold, base_speed=base_speed)
                     # self.create.drive_direct(0, 0)
-                    self.servo.go_to(-(math.degrees(self.odometry.theta) - sonar_angle))
-                    self.time.sleep(0.5)
-                    print("prev angle %f" % sonar_angle)
+                    self.servo.go_to(-(math.degrees(self.odometry.theta)))
+                    self.sleep(0.01)
+                    # print("prev angle %f" % sonar_angle)
                     print("current angle %f" % math.degrees(self.odometry.theta))
-                    sonar_angle = math.degrees(self.odometry.theta)
+                    # sonar_angle = math.degrees(self.odometry.theta)
+
+                # self.servo.go_to(0)
+                # self.sleep(0.01)
 
             print("Arrived @[{%.4f},{%.4f},{%.4f}]\n" % (
                 self.odometry.x, self.odometry.y, math.degrees(self.odometry.theta)))
