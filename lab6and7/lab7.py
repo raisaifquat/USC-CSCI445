@@ -117,6 +117,7 @@ class Run:
 
                 while dist_to_wall is not None and dist_to_wall > wall_threshold:
                     self.go_to_goal(goal_x, goal_y)
+                    dist_to_wall = self.dist_to_wall()
                     print("distance to wall %.4f" % dist_to_wall)
 
                 prev_dist_to_goal = self.dist_to_goal(goal_x, goal_y)
