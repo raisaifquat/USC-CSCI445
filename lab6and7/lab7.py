@@ -104,7 +104,7 @@ class Run:
         ])
         dist_threshold = 0.05
         wall_threshold = 0.4
-        distance_offset = 0.1
+        dist_offset_threshold = 0.1
         for point in waypoints:
             goal_x = point[0]
             goal_y = point[1]
@@ -118,51 +118,24 @@ class Run:
             prev_dist_to_goal = self.dist_to_goal(goal_x, goal_y)
 
             while self.dist_to_goal(goal_x, goal_y) > dist_threshold:
+                dist_to_wall = self.dist_to_wall()
 
-                if curr_state is State.go_to_goal:
+                while dist_to_wall is not None and dist_to_wall > wall_threshold:
                     self.go_to_goal(goal_x, goal_y)
-                    dist_to_wall = self.dist_to_wall()
-                    # dist_to_wall = self.sweep_sonar(10, sleep_time=0.5)
                     print("distance to wall %.4f" % dist_to_wall)
 
-                    if dist_to_wall is None or dist_to_wall <= wall_threshold:
-                        curr_state = State.init_wall_following
+                prev_dist_to_goal = self.dist_to_goal(goal_x, goal_y)
+                dist_to_wall = self.dist_to_wall()
+                dist_offset = self.dist_to_goal(goal_x, goal_y) - prev_dist_to_goal
+                goal_dist_to_wall = wall_threshold
 
-                elif curr_state is State.wall_following:
-                    # sonar_angle = math.degrees(self.odometry.theta)
-                    print("current angle %f" % curr_angle)
-                    goal_dist_to_wall = wall_threshold
+                while dist_offset < dist_offset_threshold and dist_to_wall < (goal_dist_to_wall * 1.1):
+                    curr_angle = math.degrees(self.odometry.theta)
 
-                    self.follow_wall(wall_threshold, base_speed=base_speed)
+                    self.follow_wall(goal_dist_to_wall, base_speed=base_speed)
                     self.servo.go_to(-curr_angle)
                     self.sleep(0.5)
-
-                    # print("prev angle %f" % sonar_angle)
-                    curr_angle = math.degrees(self.odometry.theta)
-                    print("current angle %f" % curr_angle)
-                    # sonar_angle = math.degrees(self.odometry.theta)
-
                     dist_offset = self.dist_to_goal(goal_x, goal_y) - prev_dist_to_goal
-                    dist_to_wall = self.dist_to_wall()
-                    if dist_to_wall >= (goal_dist_to_wall * 1.1) or dist_offset >= distance_offset:
-                        curr_state = State.update
-
-                elif curr_state is State.init_wall_following:
-                    print("\nfollow wall!")
-                    curr_angle = math.degrees(self.odometry.theta)
-                    prev_dist_to_goal = self.dist_to_goal(goal_x, goal_y)
-                    curr_state = State.wall_following
-
-                elif curr_state is State.update:
-                    dist_to_wall = self.dist_to_wall()
-
-                    if dist_to_wall is not None and dist_to_wall > wall_threshold:
-                        print("\ngo to goal!")
-                        curr_state = State.go_to_goal
-                        # self.servo.go_to(0)
-                        # self.sleep(0.1)
-                    else:
-                        curr_state = State.init_wall_following
 
             # self.servo.go_to(0)
             # self.sleep(0.01)
