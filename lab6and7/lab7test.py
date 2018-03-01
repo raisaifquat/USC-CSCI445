@@ -25,17 +25,51 @@ class Run:
         self.pidDistance = pid_controller.PIDController(1000, 0, 50, [0, 0], [-200, 200], is_angle=False)
         self.pd_controller = pid_controller.PIDController(1000, 0, 100, [-75, 75], [-200, 200], is_angle=False)
 
-    def sleep(self, time_in_sec):
-        """Sleeps for the specified amount of time while keeping odometry up-to-date
-        Args:
-            time_in_sec (float): time to sleep in seconds
-        """
+    def sleep(self, time_in_sec, action=None, action_args=None):
         start = self.time.time()
-        while self.time.time() - start < time_in_sec:
+        while True:
             state = self.create.update()
             if state is not None:
                 self.odometry.update(state.leftEncoderCounts, state.rightEncoderCounts)
-                print("[{},{},{}]".format(self.odometry.x, self.odometry.y, math.degrees(self.odometry.theta)))
+            t = self.time.time()
+
+            if action is not None:
+                if action_args is None:
+                    action()
+                else:
+                    action(action_args)
+
+            if start + time_in_sec <= t:
+                break
+
+    def sweep_sonar(self, degree, curr_angle: float = None, sleep_time: float = 0.01) -> float:
+        if curr_angle is None:
+            curr_angle = math.degrees(self.odometry.theta)
+
+        min_dist_to_wall = np.array([self.sonar.get_distance()])
+
+        turn_angle = curr_angle - degree
+        print("go to %f" % turn_angle)
+        self.servo.go_to(turn_angle)
+        self.sleep(sleep_time)
+        # self.time.sleep(sleep_time)
+        min_dist_to_wall = np.append(min_dist_to_wall, self.sonar.get_distance())
+
+        turn_angle = curr_angle + degree
+        print("go to %f" % turn_angle)
+        self.servo.go_to(turn_angle)
+        self.sleep(sleep_time)
+        # self.time.sleep(sleep_time)
+        min_dist_to_wall = np.append(min_dist_to_wall, self.sonar.get_distance())
+
+        turn_angle = curr_angle
+        print("go to %f" % turn_angle)
+        self.servo.go_to(turn_angle)
+        self.servo.go_to(turn_angle)
+        self.sleep(sleep_time)
+        # self.time.sleep(sleep_time)
+
+        return min_dist_to_wall.min()
 
     def run(self):
         self.create.start()
@@ -46,6 +80,21 @@ class Run:
             create2.Sensor.LeftEncoderCounts,
             create2.Sensor.RightEncoderCounts,
         ])
+        self.servo.go_to(0)
+        self.time.sleep(2)
 
-        while True:
-            print(self.sonar.get_distance())
+        wait_time = 1.0
+
+        self.servo.go_to(30)
+        # self.time.sleep(wait_time)
+        self.sleep(wait_time, self.servo.go_to, 30)
+
+        self.servo.go_to(-30)
+        # self.time.sleep(wait_time)
+        self.sleep(wait_time, self.servo.go_to, -30)
+
+        self.servo.go_to(0)
+        # self.time.sleep(wait_time)
+        self.sleep(wait_time, self.servo.go_to, 0)
+
+        # print(self.sweep_sonar(30, curr_angle=0, sleep_time=0.5))
