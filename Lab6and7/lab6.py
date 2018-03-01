@@ -50,7 +50,7 @@ class Run:
             result = np.empty((0, 5))
             distance = math.sqrt(math.pow(goal_x - self.odometry.x, 2) + math.pow(goal_y - self.odometry.y, 2))
             # end_time = self.time.time() + 10
-            while distance > 0.05:
+            while distance > 0.01:
                 state = self.create.update()
                 if state is not None:
                     self.odometry.update(state.leftEncoderCounts, state.rightEncoderCounts)
