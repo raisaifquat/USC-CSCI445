@@ -118,7 +118,7 @@ class Run:
 
             while self.dist_to_goal(goal_x, goal_y) > dist_threshold:
                 dist_to_wall = self.dist_to_wall()
-                # dist_to_wall = self.sweep_sonar(10, 1.0)
+                dist_to_wall = self.sweep_sonar(15, 0.5)
                 print("distance to wall %.4f" % dist_to_wall)
 
                 if dist_to_wall is not None and dist_to_wall > wall_threshold:
