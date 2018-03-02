@@ -51,14 +51,16 @@ class Run:
         turn_angle = curr_angle - degree
         print("go to %f" % turn_angle)
         self.servo.go_to(turn_angle)
-        self.sleep(sleep_time)
+        # self.sleep(sleep_time)
+        self.sleep(sleep_time, self.servo.go_to, turn_angle)
         # self.time.sleep(sleep_time)
         min_dist_to_wall = np.append(min_dist_to_wall, self.sonar.get_distance())
 
         turn_angle = curr_angle + degree
         print("go to %f" % turn_angle)
         self.servo.go_to(turn_angle)
-        self.sleep(sleep_time)
+        # self.sleep(sleep_time)
+        self.sleep(sleep_time, self.servo.go_to, turn_angle)
         # self.time.sleep(sleep_time)
         min_dist_to_wall = np.append(min_dist_to_wall, self.sonar.get_distance())
 
@@ -66,7 +68,8 @@ class Run:
         print("go to %f" % turn_angle)
         self.servo.go_to(turn_angle)
         self.servo.go_to(turn_angle)
-        self.sleep(sleep_time)
+        # self.sleep(sleep_time)
+        self.sleep(sleep_time, self.servo.go_to, turn_angle)
         # self.time.sleep(sleep_time)
 
         return min_dist_to_wall.min()
@@ -85,11 +88,11 @@ class Run:
 
         wait_time = 1.0
 
-        self.servo.go_to(30)
+        self.servo.go_to(10)
         # self.time.sleep(wait_time)
         self.sleep(wait_time, self.servo.go_to, 30)
 
-        self.servo.go_to(-30)
+        self.servo.go_to(-10)
         # self.time.sleep(wait_time)
         self.sleep(wait_time, self.servo.go_to, -30)
 
@@ -97,4 +100,6 @@ class Run:
         # self.time.sleep(wait_time)
         self.sleep(wait_time, self.servo.go_to, 0)
 
-        # print(self.sweep_sonar(30, curr_angle=0, sleep_time=0.5))
+        self.time.sleep(2)
+
+        print(self.sweep_sonar(10, curr_angle=0, sleep_time=wait_time))
