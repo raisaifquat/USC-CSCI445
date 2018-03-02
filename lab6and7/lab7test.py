@@ -42,35 +42,21 @@ class Run:
             if start + time_in_sec <= t:
                 break
 
-    def sweep_sonar(self, degree, curr_angle: float = None, sleep_time: float = 0.01) -> float:
-        if curr_angle is None:
-            curr_angle = math.degrees(self.odometry.theta)
+    def sweep_sonar(self, degree, sleep_time: float = 1.0) -> float:
+        curr_angle = math.degrees(self.odometry.theta)
 
         min_dist_to_wall = np.array([self.sonar.get_distance()])
 
-        turn_angle = curr_angle - degree
-        print("go to %f" % turn_angle)
-        self.servo.go_to(turn_angle)
-        # self.sleep(sleep_time)
-        self.sleep(sleep_time, self.servo.go_to, turn_angle)
-        # self.time.sleep(sleep_time)
+        self.servo.go_to(curr_angle - degree)
+        self.sleep(sleep_time, self.servo.go_to, curr_angle - degree)
         min_dist_to_wall = np.append(min_dist_to_wall, self.sonar.get_distance())
 
-        turn_angle = curr_angle + degree
-        print("go to %f" % turn_angle)
-        self.servo.go_to(turn_angle)
-        # self.sleep(sleep_time)
-        self.sleep(sleep_time, self.servo.go_to, turn_angle)
-        # self.time.sleep(sleep_time)
+        self.servo.go_to(curr_angle + degree)
+        self.sleep(sleep_time, self.servo.go_to, curr_angle + degree)
         min_dist_to_wall = np.append(min_dist_to_wall, self.sonar.get_distance())
 
-        turn_angle = curr_angle
-        print("go to %f" % turn_angle)
-        self.servo.go_to(turn_angle)
-        self.servo.go_to(turn_angle)
-        # self.sleep(sleep_time)
-        self.sleep(sleep_time, self.servo.go_to, turn_angle)
-        # self.time.sleep(sleep_time)
+        self.servo.go_to(curr_angle)
+        self.sleep(sleep_time, self.servo.go_to, curr_angle)
 
         return min_dist_to_wall.min()
 
@@ -86,22 +72,27 @@ class Run:
         self.servo.go_to(0)
         self.time.sleep(2)
 
-        wait_time = 1.0
+        wait_time = 1.5
 
         print(self.sonar.get_distance())
 
-        self.servo.go_to(10)
+        curr_angle = 0.0
+
+        turn_angle = int(curr_angle + 10)
+        self.servo.go_to(turn_angle)
         # self.time.sleep(wait_time)
-        self.sleep(wait_time, self.servo.go_to, 30)
+        self.sleep(wait_time, self.servo.go_to, turn_angle)
 
-        self.servo.go_to(-10)
+        turn_angle = int(curr_angle - 10)
+        self.servo.go_to(turn_angle)
         # self.time.sleep(wait_time)
-        self.sleep(wait_time, self.servo.go_to, -30)
+        self.sleep(wait_time, self.servo.go_to, turn_angle)
 
-        self.servo.go_to(0)
+        turn_angle = int(curr_angle)
+        self.servo.go_to(turn_angle)
         # self.time.sleep(wait_time)
-        self.sleep(wait_time, self.servo.go_to, 0)
+        self.sleep(wait_time, self.servo.go_to, turn_angle)
 
-        self.time.sleep(2)
+        # self.time.sleep(2)
 
-        print(self.sweep_sonar(10, curr_angle=0, sleep_time=wait_time))
+        # print(self.sweep_sonar(10, curr_angle=0, sleep_time=wait_time))

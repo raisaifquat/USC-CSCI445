@@ -67,7 +67,7 @@ class Run:
         output = self.pidWallFollow.update(distance, goal_dist, self.time.time())
         self.create.drive_direct(int(base_speed - output), int(base_speed + output))
 
-    def sweep_sonar(self, degree, sleep_time: float = 0.01) -> float:
+    def sweep_sonar(self, degree, sleep_time: float = 1.0) -> float:
         curr_angle = math.degrees(self.odometry.theta)
 
         min_dist_to_wall = np.array([self.sonar.get_distance()])
@@ -118,6 +118,7 @@ class Run:
 
             while self.dist_to_goal(goal_x, goal_y) > dist_threshold:
                 dist_to_wall = self.dist_to_wall()
+                # dist_to_wall = self.sweep_sonar(10, 1.0)
                 print("distance to wall %.4f" % dist_to_wall)
 
                 if dist_to_wall is not None and dist_to_wall > wall_threshold:
@@ -159,7 +160,7 @@ class Run:
                 # self.create.drive_direct(v_right, v_left)
 
             # self.servo.go_to(0)
-            # self.sleep(0.01)
+            # self.sleep(1.0)
 
         print("Arrived @[{%.4f},{%.4f},{%.4f}]\n" % (
             self.odometry.x, self.odometry.y, math.degrees(self.odometry.theta)))
