@@ -25,7 +25,7 @@ class Run:
         # self.pidTheta = pd_controller2.PDController(500, 100, -200, 200, is_angle=True)
         self.pidTheta = pid_controller.PIDController(300, 5, 50, [-10, 10], [-200, 200], is_angle=True)
         self.pidDistance = pid_controller.PIDController(1000, 0, 50, [0, 0], [-200, 200], is_angle=False)
-        self.pd_controller = pid_controller.PIDController(1000, 0, 100, [-75, 75], [-200, 200], is_angle=False)
+        self.pidWallFollow = pid_controller.PIDController(1000, 0, 100, [-75, 75], [-200, 200], is_angle=False)
 
     def sleep(self, time_in_sec, action=None, action_args=None):
         start = self.time.time()
@@ -41,7 +41,7 @@ class Run:
                 self.odometry.update(state.leftEncoderCounts, state.rightEncoderCounts)
                 # print("[{},{},{}]".format(self.odometry.x, self.odometry.y, math.degrees(self.odometry.theta)))
 
-    def go_to_goal(self, goal_x, goal_y):
+    def go_to_goal(self, goal_x: float, goal_y: float) -> None:
         state = self.create.update()
         if state is not None:
             self.odometry.update(state.leftEncoderCounts, state.rightEncoderCounts)
@@ -54,19 +54,18 @@ class Run:
 
             self.create.drive_direct(int(output_theta + output_distance), int(-output_theta + output_distance))
 
-    def dist_to_goal(self, goal_x, goal_y):
+    def dist_to_goal(self, goal_x: float, goal_y: float) -> float:
         return math.sqrt((goal_x - self.odometry.x) ** 2 + (goal_y - self.odometry.y) ** 2)
 
-    def dist_to_wall(self):
+    def dist_to_wall(self) -> float:
         return self.sonar.get_distance()
 
-    def follow_wall(self, goal_dist, base_speed: float = 100.0):
-        distance = self.sonar.get_distance()
-        if distance is not None:
-            # print(distance)
-            output = self.pd_controller.update(distance, goal_dist, self.time.time())
-            self.create.drive_direct(int(base_speed - output), int(base_speed + output))
-            self.sleep(0.01)
+    def follow_wall(self, distance: float, goal_dist: float, base_speed: float = 100.0) -> None:
+        if distance is None:
+            return
+            
+        output = self.pidWallFollow.update(distance, goal_dist, self.time.time())
+        self.create.drive_direct(int(base_speed - output), int(base_speed + output))
 
     def sweep_sonar(self, degree, sleep_time: float = 0.01) -> float:
         curr_angle = math.degrees(self.odometry.theta)
@@ -120,9 +119,9 @@ class Run:
             while self.dist_to_goal(goal_x, goal_y) > dist_threshold:
                 dist_to_wall = self.dist_to_wall()
                 print("distance to wall %.4f" % dist_to_wall)
-                print("current angle: %.4f\n" % math.degrees(self.odometry.theta))
 
                 if dist_to_wall is not None and dist_to_wall > wall_threshold:
+                    print("distance to goal %.4f\n" % self.dist_to_goal(goal_x, goal_y))
                     state = self.create.update()
                     if state is not None:
                         self.odometry.update(state.leftEncoderCounts, state.rightEncoderCounts)
@@ -136,30 +135,19 @@ class Run:
                         v_right = int(output_theta + output_distance)
                         v_left = int(-output_theta + output_distance)
 
-                # while dist_to_wall is not None and dist_to_wall > wall_threshold:
-                #     self.go_to_goal(goal_x, goal_y)
-                #     dist_to_wall = self.dist_to_wall()
-                #     print("distance to wall %.4f" % dist_to_wall)
-
                 prev_dist_to_goal = self.dist_to_goal(goal_x, goal_y)
                 dist_to_wall = self.dist_to_wall()
                 dist_offset = self.dist_to_goal(goal_x, goal_y) - prev_dist_to_goal
                 goal_dist_to_wall = wall_threshold + 0.1
 
-                # while dist_offset < dist_offset_threshold and dist_to_wall < (goal_dist_to_wall * 1.1):
-                #     curr_angle = math.degrees(self.odometry.theta)
-
-                #     self.follow_wall(goal_dist_to_wall, base_speed=base_speed)
-                #     self.servo.go_to(-curr_angle)
-                #     self.sleep(0.5)
-                #     dist_offset = self.dist_to_goal(goal_x, goal_y) - prev_dist_to_goal
-
                 if (dist_offset < dist_offset_threshold
                         and dist_to_wall is not None
                         and dist_to_wall < (goal_dist_to_wall * 1.1)):
                     curr_angle = math.degrees(self.odometry.theta)
+                    print("current angle: %.4f\n" % curr_angle)
 
-                    output = self.pd_controller.update(dist_to_wall, goal_dist_to_wall, self.time.time())
+                    output = self.pidWallFollow.update(dist_to_wall, goal_dist_to_wall, self.time.time())
+
                     v_right = int(base_speed - output)
                     v_left = int(base_speed + output)
 

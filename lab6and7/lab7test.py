@@ -88,6 +88,8 @@ class Run:
 
         wait_time = 1.0
 
+        print(self.sonar.get_distance())
+
         self.servo.go_to(10)
         # self.time.sleep(wait_time)
         self.sleep(wait_time, self.servo.go_to, 30)
