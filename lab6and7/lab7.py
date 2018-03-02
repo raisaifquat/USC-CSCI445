@@ -105,6 +105,8 @@ class Run:
         dist_threshold = 0.05
         wall_threshold = 0.4
         dist_offset_threshold = 0.1
+        v_left = 0.0
+        v_right = 0.0
         for point in waypoints:
             goal_x = point[0]
             goal_y = point[1]
@@ -114,24 +116,52 @@ class Run:
 
             while self.dist_to_goal(goal_x, goal_y) > dist_threshold:
                 dist_to_wall = self.dist_to_wall()
+                print("distance to wall %.4f" % dist_to_wall)
 
-                while dist_to_wall is not None and dist_to_wall > wall_threshold:
-                    self.go_to_goal(goal_x, goal_y)
-                    dist_to_wall = self.dist_to_wall()
-                    print("distance to wall %.4f" % dist_to_wall)
+                if dist_to_wall is not None and dist_to_wall > wall_threshold:
+                    state = self.create.update()
+                    if state is not None:
+                        self.odometry.update(state.leftEncoderCounts, state.rightEncoderCounts)
+
+                        goal_theta = math.atan2(goal_y - self.odometry.y, goal_x - self.odometry.x)
+                        output_theta = self.pidTheta.update(self.odometry.theta, goal_theta, self.time.time())
+
+                        distance = self.dist_to_goal(goal_x, goal_y)
+                        output_distance = self.pidDistance.update(0, distance, self.time.time())
+
+                        v_right = int(output_theta + output_distance)
+                        v_left = int(-output_theta + output_distance)
+
+                # while dist_to_wall is not None and dist_to_wall > wall_threshold:
+                #     self.go_to_goal(goal_x, goal_y)
+                #     dist_to_wall = self.dist_to_wall()
+                #     print("distance to wall %.4f" % dist_to_wall)
 
                 prev_dist_to_goal = self.dist_to_goal(goal_x, goal_y)
                 dist_to_wall = self.dist_to_wall()
                 dist_offset = self.dist_to_goal(goal_x, goal_y) - prev_dist_to_goal
                 goal_dist_to_wall = wall_threshold
 
-                while dist_offset < dist_offset_threshold and dist_to_wall < (goal_dist_to_wall * 1.1):
-                    curr_angle = math.degrees(self.odometry.theta)
+                # while dist_offset < dist_offset_threshold and dist_to_wall < (goal_dist_to_wall * 1.1):
+                #     curr_angle = math.degrees(self.odometry.theta)
 
-                    self.follow_wall(goal_dist_to_wall, base_speed=base_speed)
+                #     self.follow_wall(goal_dist_to_wall, base_speed=base_speed)
+                #     self.servo.go_to(-curr_angle)
+                #     self.sleep(0.5)
+                #     dist_offset = self.dist_to_goal(goal_x, goal_y) - prev_dist_to_goal
+
+                if dist_offset < dist_offset_threshold and dist_to_wall < (goal_dist_to_wall * 1.1):
+                    curr_angle = math.degrees(self.odometry.theta)
+                    
+                    output = self.pd_controller.update(dist_to_wall, goal_dist_to_wall, self.time.time())
+                    v_right = int(base_speed - output)
+                    v_left = int(base_speed + output)
+
                     self.servo.go_to(-curr_angle)
                     self.sleep(0.5)
                     dist_offset = self.dist_to_goal(goal_x, goal_y) - prev_dist_to_goal
+                
+                self.create.drive_direct(v_right, v_left)
 
             # self.servo.go_to(0)
             # self.sleep(0.01)
