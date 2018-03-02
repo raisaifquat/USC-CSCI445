@@ -103,7 +103,7 @@ class Run:
         ])
 
         dist_threshold = 0.05
-        wall_threshold = 0.4
+        wall_threshold = 0.3
         dist_offset_threshold = 0.05
         # wheel speed
         v_left = 0.0
