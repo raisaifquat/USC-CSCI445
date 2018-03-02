@@ -106,8 +106,8 @@ class Run:
         wall_threshold = 0.3
         dist_offset_threshold = 0.05
         # wheel speed
-        v_left = 0.0
-        v_right = 0.0
+        # v_left = 0.0
+        # v_right = 0.0
 
         for point in way_points:
             goal_x = point[0]
@@ -121,9 +121,7 @@ class Run:
                 print("distance to wall %.4f" % dist_to_wall)
 
                 if dist_to_wall is not None and dist_to_wall > wall_threshold:
-                    print("distance to goal %.4f\n" % self.dist_to_goal(goal_x, goal_y))
                     self.go_to_goal(goal_x, goal_y)
-                    continue
                     # state = self.create.update()
                     # if state is not None:
                     #     self.odometry.update(state.leftEncoderCounts, state.rightEncoderCounts)
@@ -158,7 +156,7 @@ class Run:
                     self.servo.go_to(-(curr_angle * 5 / 6))
                     self.sleep(0.1)
 
-                self.create.drive_direct(v_right, v_left)
+                # self.create.drive_direct(v_right, v_left)
 
             # self.servo.go_to(0)
             # self.sleep(0.01)
