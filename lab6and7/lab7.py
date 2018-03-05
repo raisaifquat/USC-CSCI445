@@ -125,11 +125,15 @@ class Run:
         dist_threshold = 0.05
         wall_threshold = 0.3
         dist_offset_threshold = 0.05
+        goal_dist_to_wall = wall_threshold + 0.1
         sonar_sweep_angle = 30
-        sonar_sweep_sleep_time = 0.1
+        sonar_sweep_sleep_time = 0.5
 
-        def wall_interrupt(dist_):
+        def go_to_goal_interrupt(dist_):
             return dist_ < wall_threshold
+
+        def wall_follow_interrupt(dist_):
+            return dist_ >= (goal_dist_to_wall * 1.1)
 
         # wheel speed
         # v_left = 0.0
@@ -144,26 +148,19 @@ class Run:
 
             while self.dist_to_goal(goal_x, goal_y) > dist_threshold:
                 # dist_to_wall = self.dist_to_wall()
-                dist_to_wall = self.sweep_sonar(
-                    sonar_sweep_angle,
-                    sonar_sweep_sleep_time,
-                    interrupt=wall_interrupt
-                )
+                dist_to_wall = self.sweep_sonar(sonar_sweep_angle, sonar_sweep_sleep_time,
+                                                interrupt=go_to_goal_interrupt)
                 print("distance to wall %.4f" % dist_to_wall)
 
                 while dist_to_wall is not None and dist_to_wall > wall_threshold:
                     self.go_to_goal(goal_x, goal_y)
                     # dist_to_wall = self.dist_to_wall()
-                    dist_to_wall = self.sweep_sonar(
-                        sonar_sweep_angle,
-                        sonar_sweep_sleep_time,
-                        interrupt=wall_interrupt
-                    )
+                    dist_to_wall = self.sweep_sonar(sonar_sweep_angle, sonar_sweep_sleep_time,
+                                                    interrupt=go_to_goal_interrupt)
 
                 prev_dist_to_goal = self.dist_to_goal(goal_x, goal_y)
                 dist_to_wall = self.dist_to_wall()
                 dist_offset = self.dist_to_goal(goal_x, goal_y) - prev_dist_to_goal
-                goal_dist_to_wall = wall_threshold + 0.1
 
                 while (dist_offset < dist_offset_threshold
                        and dist_to_wall is not None
