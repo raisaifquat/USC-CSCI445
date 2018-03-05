@@ -131,6 +131,7 @@ class Run:
 
         def go_to_goal_interrupt(dist_):
             return dist_ < wall_threshold
+            # return False
 
         def wall_follow_interrupt(dist_):
             return dist_ >= (goal_dist_to_wall * 1.1)
