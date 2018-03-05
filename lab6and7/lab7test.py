@@ -6,12 +6,6 @@ import odometry
 import pd_controller2
 import pid_controller
 
-import matplotlib
-
-# if on the robot, don't use X backend
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-
 
 class Run:
     def __init__(self, factory):
@@ -25,8 +19,8 @@ class Run:
         self.pidDistance = pid_controller.PIDController(1000, 0, 50, [0, 0], [-200, 200], is_angle=False)
         self.pd_controller = pid_controller.PIDController(1000, 0, 100, [-75, 75], [-200, 200], is_angle=False)
 
-    def sleep(self, time_in_sec, action=None, action_args=None):
-        result = np.array([])
+    def sleep(self, time_in_sec, is_get_dist: bool = False, interrupt=None):
+        result = math.inf
         start = self.time.time()
         while True:
             state = self.create.update()
@@ -34,46 +28,41 @@ class Run:
                 self.odometry.update(state.leftEncoderCounts, state.rightEncoderCounts)
             t = self.time.time()
 
-            if action is not None:
-                if action_args is None:
-                    result = np.append(result, action())
-                else:
-                    action(action_args)
+            if is_get_dist:
+                result = min(self.sonar.get_distance(), result)
+
+                if interrupt is not None and interrupt(result):
+                    break
 
             if start + time_in_sec <= t:
                 break
 
-            return None if result.size == 0 else result.min()
+        return None if not is_get_dist else result
 
-    def sweep_sonar(self, degree, sleep_time: float = 1.0) -> float:
+    def sweep_sonar(self, degree, sleep_time: float = 1.0, interrupt=None) -> float:
         curr_angle = math.degrees(self.odometry.theta)
 
-        # min_dist_to_wall = np.array([self.sonar.get_distance()])
-        print(self.sonar.get_distance())
-        self.sleep(0.1)
+        min_dist_to_wall = math.inf
 
         self.servo.go_to(curr_angle - degree)
-        # self.sleep(sleep_time)
-        self.sleep(sleep_time, self.sonar.get_distance)
-        # min_dist_to_wall = np.append(min_dist_to_wall, self.sonar.get_distance())
-        self.sleep(0.1)
-        print(self.sonar.get_distance())
-        self.sleep(0.1)
+        dist = self.sleep(sleep_time, is_get_dist=True, interrupt=interrupt)
+        if interrupt(dist):
+            return dist
+        min_dist_to_wall = min(min_dist_to_wall, dist, self.sonar.get_distance())
 
         self.servo.go_to(curr_angle + degree)
-        # self.sleep(sleep_time)
-        self.sleep(sleep_time, self.sonar.get_distance)
-        # min_dist_to_wall = np.append(min_dist_to_wall, self.sonar.get_distance())
-        self.sleep(0.1)
-        print(self.sonar.get_distance())
-        self.sleep(0.1)
+        dist = self.sleep(sleep_time, is_get_dist=True, interrupt=interrupt)
+        if interrupt(dist):
+            return dist
+        min_dist_to_wall = min(min_dist_to_wall, dist, self.sonar.get_distance())
 
         self.servo.go_to(curr_angle)
-        # self.sleep(sleep_time)
-        self.sleep(sleep_time, self.sonar.get_distance)
+        dist = self.sleep(sleep_time, is_get_dist=True, interrupt=interrupt)
+        if interrupt(dist):
+            return dist
+        min_dist_to_wall = min(min_dist_to_wall, dist, self.sonar.get_distance())
 
-        # return min_dist_to_wall.min()
-        return 0
+        return min_dist_to_wall
 
     def run(self):
         self.create.start()
@@ -90,25 +79,32 @@ class Run:
         # print(self.sonar.get_distance())
 
         curr_angle = 0.0
-        degree = 15
-        wait_time = 0.5
+        degree = 30
+        wait_time = 1.0
+        threshold = 0.908
 
-        # turn_angle = curr_angle + degree
-        # self.servo.go_to(turn_angle)
+        turn_angle = curr_angle - degree
+        self.servo.go_to(turn_angle)
         # self.time.sleep(wait_time)
-        # # self.sleep(wait_time, self.servo.go_to, turn_angle)
-        #
-        # turn_angle = curr_angle - degree
-        # self.servo.go_to(turn_angle)
+        self.sleep(wait_time)
+        print(self.sonar.get_distance())
+
+        turn_angle = curr_angle + degree
+        self.servo.go_to(turn_angle)
         # self.time.sleep(wait_time)
-        # # self.sleep(wait_time, self.servo.go_to, turn_angle)
-        #
-        # turn_angle = curr_angle
-        # self.servo.go_to(turn_angle)
+        self.sleep(wait_time)
+        print(self.sonar.get_distance())
+
+        turn_angle = curr_angle
+        self.servo.go_to(turn_angle)
         # self.time.sleep(wait_time)
-        # # self.sleep(wait_time, self.servo.go_to, turn_angle)
+        self.sleep(wait_time)
+        print(self.sonar.get_distance())
 
         self.time.sleep(2)
 
         print("----------------")
-        print("%f" % self.sweep_sonar(degree, sleep_time=wait_time))
+        print("%f" % self.sweep_sonar(degree, sleep_time=1.0, interrupt=lambda x: x < threshold))
+
+        print("----------------")
+        print("%f" % self.sweep_sonar(degree, sleep_time=wait_time, interrupt=lambda x: x < threshold))

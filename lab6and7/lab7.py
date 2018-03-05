@@ -27,19 +27,31 @@ class Run:
         self.pidDistance = pid_controller.PIDController(1000, 0, 50, [0, 0], [-200, 200], is_angle=False)
         self.pidWallFollow = pid_controller.PIDController(1000, 0, 100, [-75, 75], [-200, 200], is_angle=False)
 
-    def sleep(self, time_in_sec, action=None, action_args=None):
+    def sleep(self, time_in_sec, is_get_dist: bool = False, interrupt=lambda x: False):
+        result = math.inf
         start = self.time.time()
-        while self.time.time() - start < time_in_sec:
+        while True:
             state = self.create.update()
-            if action is not None:
-                if action_args is None:
-                    action()
-                else:
-                    action(action_args)
-
             if state is not None:
                 self.odometry.update(state.leftEncoderCounts, state.rightEncoderCounts)
-                # print("[{},{},{}]".format(self.odometry.x, self.odometry.y, math.degrees(self.odometry.theta)))
+            t = self.time.time()
+
+            if is_get_dist:
+                result = min(self.sonar.get_distance(), result)
+
+                if interrupt(result):
+                    break
+
+            if start + time_in_sec <= t:
+                break
+
+        return None if not is_get_dist else result
+
+    def dist_to_goal(self, goal_x: float, goal_y: float) -> float:
+        return math.sqrt((goal_x - self.odometry.x) ** 2 + (goal_y - self.odometry.y) ** 2)
+
+    def dist_to_wall(self) -> float:
+        return self.sonar.get_distance()
 
     def go_to_goal(self, goal_x: float, goal_y: float) -> None:
         state = self.create.update()
@@ -52,38 +64,46 @@ class Run:
             distance = self.dist_to_goal(goal_x, goal_y)
             output_distance = self.pidDistance.update(0, distance, self.time.time())
 
-            self.create.drive_direct(int(output_theta + output_distance), int(-output_theta + output_distance))
-
-    def dist_to_goal(self, goal_x: float, goal_y: float) -> float:
-        return math.sqrt((goal_x - self.odometry.x) ** 2 + (goal_y - self.odometry.y) ** 2)
-
-    def dist_to_wall(self) -> float:
-        return self.sonar.get_distance()
+            v_right = int(output_theta + output_distance)
+            v_left = int(-output_theta + output_distance)
+            print("gtg [v_right: %.2f, v_left: %.2f]" % (v_right, v_left))
+            self.create.drive_direct(v_right, v_left)
 
     def follow_wall(self, distance: float, goal_dist: float, base_speed: float = 100.0) -> None:
         if distance is None:
             return
             
         output = self.pidWallFollow.update(distance, goal_dist, self.time.time())
-        self.create.drive_direct(int(base_speed - output), int(base_speed + output))
 
-    def sweep_sonar(self, degree, sleep_time: float = 1.0) -> float:
+        v_right = int(base_speed - output)
+        v_left = int(base_speed + output)
+        print("fw [v_right: %.2f, v_left: %.2f]" % (v_right, v_left))
+        self.create.drive_direct(v_right, v_left)
+
+    def sweep_sonar(self, degree, sleep_time: float = 1.0, interrupt=lambda x: False) -> float:
         curr_angle = math.degrees(self.odometry.theta)
 
-        min_dist_to_wall = np.array([self.sonar.get_distance()])
+        min_dist_to_wall = math.inf
 
         self.servo.go_to(curr_angle - degree)
-        self.sleep(sleep_time, self.servo.go_to, curr_angle - degree)
-        min_dist_to_wall = np.append(min_dist_to_wall, self.sonar.get_distance())
+        dist = self.sleep(sleep_time, is_get_dist=True, interrupt=interrupt)
+        if interrupt(dist):
+            return dist
+        min_dist_to_wall = min(min_dist_to_wall, dist, self.sonar.get_distance())
 
         self.servo.go_to(curr_angle + degree)
-        self.sleep(sleep_time, self.servo.go_to, curr_angle + degree)
-        min_dist_to_wall = np.append(min_dist_to_wall, self.sonar.get_distance())
+        dist = self.sleep(sleep_time, is_get_dist=True, interrupt=interrupt)
+        if interrupt(dist):
+            return dist
+        min_dist_to_wall = min(min_dist_to_wall, dist, self.sonar.get_distance())
 
         self.servo.go_to(curr_angle)
-        self.sleep(sleep_time, self.servo.go_to, curr_angle)
+        dist = self.sleep(sleep_time, is_get_dist=True, interrupt=interrupt)
+        if interrupt(dist):
+            return dist
+        min_dist_to_wall = min(min_dist_to_wall, dist, self.sonar.get_distance())
 
-        return min_dist_to_wall.min()
+        return min_dist_to_wall
 
     def run(self):
         self.create.start()
