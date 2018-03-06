@@ -39,10 +39,7 @@ class Run:
             if is_get_dist:
                 result = min(self.sonar.get_distance(), result)
 
-                if interrupt(result):
-                    break
-
-            if start + time_in_sec <= t:
+            if start + time_in_sec <= t or interrupt(result):
                 break
 
         return None if not is_get_dist else result
