@@ -80,7 +80,7 @@ class Run:
 
         return min_dist_to_wall
 
-    def go_to_goal(self, goal_x: float, goal_y: float, dist_to_goal: float) -> None:
+    def go_to_goal(self, goal_x: float, goal_y: float) -> None:
         state = self.create.update()
         if state is not None:
             self.odometry.update(state.leftEncoderCounts, state.rightEncoderCounts)
@@ -88,6 +88,7 @@ class Run:
             goal_theta = math.atan2(goal_y - self.odometry.y, goal_x - self.odometry.x)
             output_theta = self.pidTheta.update(self.odometry.theta, goal_theta, self.time.time())
 
+            dist_to_goal = self.get_dist_to_goal(goal_x, goal_y)
             output_distance = self.pidDistance.update(0, dist_to_goal, self.time.time())
 
             v_right = int(output_theta + output_distance)
@@ -152,7 +153,7 @@ class Run:
                 print("distance to wall %.4f" % dist_to_wall)
 
                 while dist_to_wall is not None and dist_to_wall > wall_threshold:
-                    # self.go_to_goal(goal_x, goal_y, self.get_dist_to_goal(goal_x, goal_y))
+                    # self.go_to_goal(goal_x, goal_y)
                     # # dist_to_wall = self.sonar.get_distance()
                     # dist_to_wall = self.sweep_sonar(sonar_sweep_angle, sonar_sweep_sleep_time,
                     #                                 interrupt=go_to_goal_interrupt)
@@ -161,8 +162,11 @@ class Run:
                     for turn_angle in turn_angles:
                         dist_to_wall = self.go_to_angle(turn_angle, sonar_sweep_sleep_time, is_get_dist=True,
                                                         interrupt=go_to_goal_interrupt)
+
                         if go_to_goal_interrupt(dist_to_wall):
                             break
+
+                        self.go_to_goal(goal_x, goal_y)
 
                 prev_dist_to_goal = self.get_dist_to_goal(goal_x, goal_y)
                 dist_to_wall = self.sonar.get_distance()
