@@ -53,6 +53,10 @@ class Run:
     def dist_to_wall(self) -> float:
         return self.sonar.get_distance()
 
+    def go_to_angle(self, angle: float = 0, sleep_time: float = 0.5):
+        self.servo.go_to(angle)
+        self.sleep(sleep_time)
+
     def go_to_goal(self, goal_x: float, goal_y: float) -> None:
         state = self.create.update()
         if state is not None:
