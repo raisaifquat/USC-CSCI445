@@ -186,6 +186,7 @@ class Run:
                     curr_angle = math.degrees(self.odometry.theta)
                     print("fw [dist_to_wall: %.4f]\nfw [curr_angle: %.4f]\n" % (dist_to_wall, curr_angle))
 
+                    self.go_to_angle(-(curr_angle * 5 / 6), 0.1)
                     dist_to_wall = self.sonar.get_distance()
                     # dist_to_wall = self.go_to_angle(-(curr_angle * 5 / 6), 0.1, is_get_dist=True)
                     # dist_to_wall = self.go_to_angle(-curr_angle, 0.1, is_get_dist=True)

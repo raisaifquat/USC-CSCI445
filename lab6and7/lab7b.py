@@ -99,7 +99,7 @@ class Run:
         dist_threshold = 0.05
         wall_threshold = 0.3
         dist_offset_threshold = 0.05
-        goal_dist_to_wall = wall_threshold
+        goal_dist_to_wall = wall_threshold + 0.1
         sonar_sweep_angle = 30
         sonar_sweep_sleep_time = 0.5
         next_state = State.go_to_goal
@@ -150,29 +150,34 @@ class Run:
                 if next_state is State.go_to_goal:
                     if dist_to_wall is None or dist_to_wall <= wall_threshold:
                         next_state = State.init_wall_following
-                        continue
 
                     v_right = int(output_theta + output_distance)
                     v_left = int(-output_theta + output_distance)
-                    # print("fw [v_right: %.2f, v_left: %.2f]" % (v_right, v_left))
-                elif next_state is State.init_wall_following:
+                    print("gtg [v_right: %.2f, v_left: %.2f]" % (v_right, v_left))
+
+                if next_state is State.init_wall_following:
                     next_state = State.wall_following
                     prev_dist_to_goal = self.get_dist_to_goal(goal_x, goal_y)
-                    print("prev_dist_to_goal [init_wf]: %f" % prev_dist_to_goal)
-                elif next_state is State.wall_following:
+                    # print("prev_dist_to_goal [init_wf]: %f" % prev_dist_to_goal)
+
+                if next_state is State.wall_following:
                     dist_offset = self.get_dist_to_goal(goal_x, goal_y) - prev_dist_to_goal
                     # print("prev_dist_to_goal [wf]: %f\n" % prev_dist_to_goal)
+                    print("wf [v_right: %.2f, v_left: %.2f]" % (v_right, v_left))
 
                     if (dist_offset >= dist_offset_threshold
-                            or dist_to_wall is not None
+                            or dist_to_wall is None
                             or dist_to_wall >= (goal_dist_to_wall * 1.1)):
                         next_state = State.go_to_goal
-                        continue
+
+                    curr_angle = math.degrees(self.odometry.theta)
+                    self.go_to_angle(-(curr_angle * 5 / 6), 0.1)
 
                     v_right = int(base_speed - output_wall_follow)
                     v_left = int(base_speed + output_wall_follow)
 
-                print("%f, %f" % (v_right, v_left))
+                # print("%f, %f" % (v_right, v_left))
+                print("\n")
                 self.create.drive_direct(v_right, v_left)
 
             # self.servo.go_to(0)
