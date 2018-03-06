@@ -150,7 +150,7 @@ class Run:
                 # dist_to_wall = self.sweep_sonar(sonar_sweep_angle, sonar_sweep_sleep_time, curr_sonar_angle,
                 #                                 interrupt=go_to_goal_interrupt)
                 print("dist_to_wall: %.4f" % dist_to_wall)
-                self.go_to_angle(curr_sonar_angle, sonar_sweep_sleep_time)
+                # self.go_to_angle(curr_sonar_angle, sonar_sweep_sleep_time)
 
                 while dist_to_wall is not None and dist_to_wall > wall_threshold:
                     # self.go_to_goal(goal_x, goal_y)
