@@ -52,25 +52,24 @@ class Run:
         self.servo.go_to(angle)
         return self.sleep(sleep_time, is_get_dist=is_get_dist, interrupt=interrupt)
 
-    def sweep_sonar(self, turn_angle, sleep_time: float = 1.0, interrupt=lambda x: False) -> float:
-        curr_angle = math.degrees(self.odometry.theta)
+    def sweep_sonar(self, turn_angle, curr_angle: float = None, sleep_time: float = 1.0,
+                    interrupt=lambda x: False) -> float:
+        if curr_angle is None:
+            curr_angle = math.degrees(self.odometry.theta)
 
         min_dist_to_wall = math.inf
 
-        self.servo.go_to(curr_angle - turn_angle)
-        dist = self.sleep(sleep_time, is_get_dist=True, interrupt=interrupt)
+        dist = self.go_to_angle(curr_angle - turn_angle, sleep_time, is_get_dist=True, interrupt=interrupt)
         if interrupt(dist):
             return dist
         min_dist_to_wall = min(min_dist_to_wall, dist, self.sonar.get_distance())
 
-        self.servo.go_to(curr_angle)
-        dist = self.sleep(sleep_time, is_get_dist=True, interrupt=interrupt)
+        dist = self.go_to_angle(curr_angle - turn_angle, sleep_time, is_get_dist=True, interrupt=interrupt)
         if interrupt(dist):
             return dist
         min_dist_to_wall = min(min_dist_to_wall, dist, self.sonar.get_distance())
 
-        self.servo.go_to(curr_angle + turn_angle)
-        dist = self.sleep(sleep_time, is_get_dist=True, interrupt=interrupt)
+        dist = self.go_to_angle(curr_angle - turn_angle, sleep_time, is_get_dist=True, interrupt=interrupt)
         if interrupt(dist):
             return dist
         min_dist_to_wall = min(min_dist_to_wall, dist, self.sonar.get_distance())
@@ -138,7 +137,7 @@ class Run:
         def wall_follow_interrupt(dist_):
             return dist_ >= (goal_dist_to_wall * 1.1)
 
-        curr_angle = 0
+        curr_sonar_angle = 0
         for point in way_points:
             goal_x = point[0]
             goal_y = point[1]
@@ -147,10 +146,11 @@ class Run:
             print("Going to @{%.4f, %.4f}" % (goal_x, goal_y))
 
             while self.get_dist_to_goal(goal_x, goal_y) > dist_threshold:
-                # dist_to_wall = self.sonar.get_distance()
-                dist_to_wall = self.sweep_sonar(sonar_sweep_angle, sonar_sweep_sleep_time,
-                                                interrupt=go_to_goal_interrupt)
-                print("distance to wall %.4f" % dist_to_wall)
+                dist_to_wall = self.sonar.get_distance()
+                # dist_to_wall = self.sweep_sonar(sonar_sweep_angle, sonar_sweep_sleep_time, curr_sonar_angle,
+                #                                 interrupt=go_to_goal_interrupt)
+                print("dist_to_wall: %.4f" % dist_to_wall)
+                self.go_to_angle(curr_sonar_angle, sonar_sweep_sleep_time)
 
                 while dist_to_wall is not None and dist_to_wall > wall_threshold:
                     # self.go_to_goal(goal_x, goal_y)
@@ -158,10 +158,12 @@ class Run:
                     # dist_to_wall = self.sweep_sonar(sonar_sweep_angle, sonar_sweep_sleep_time,
                     #                                 interrupt=go_to_goal_interrupt)
 
-                    turn_angles = np.array([curr_angle - sonar_sweep_angle, curr_angle, curr_angle + sonar_sweep_angle])
+                    turn_angles = np.array(
+                        [curr_sonar_angle - sonar_sweep_angle, curr_sonar_angle, curr_sonar_angle + sonar_sweep_angle])
                     for turn_angle in turn_angles:
                         dist_to_wall = self.go_to_angle(turn_angle, sonar_sweep_sleep_time, is_get_dist=True,
                                                         interrupt=go_to_goal_interrupt)
+                        print("gtg [dist_to_wall: %.4f]\n" % dist_to_wall)
 
                         if go_to_goal_interrupt(dist_to_wall):
                             break
@@ -178,11 +180,10 @@ class Run:
                     self.follow_wall(dist_to_wall, goal_dist_to_wall, base_speed=base_speed)
 
                     curr_angle = math.degrees(self.odometry.theta)
-                    print("current angle: %.4f\n" % curr_angle)
+                    print("fw [dist_to_wall: %.4f]\nfw [curr_angle: %.4f]\n" % (dist_to_wall, curr_angle))
 
-                    # self.servo.go_to(-(curr_angle * 5 / 6))
-                    self.servo.go_to(-curr_angle)
-                    dist_to_wall = self.sleep(0.1, is_get_dist=True)
+                    # dist_to_wall = self.go_to_angle(-(curr_angle * 5 / 6), 0.1, is_get_dist=True)
+                    dist_to_wall = self.go_to_angle(-curr_angle, 0.1, is_get_dist=True)
 
             # self.servo.go_to(0)
             # self.sleep(1.0)
