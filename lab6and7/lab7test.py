@@ -80,7 +80,7 @@ class Run:
 
         curr_angle = 0.0
         degree = 30
-        wait_time = 1.0
+        wait_time = 0.5
         threshold = 0.908
 
         turn_angle = curr_angle - degree

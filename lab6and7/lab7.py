@@ -80,18 +80,12 @@ class Run:
         print("fw [v_right: %.2f, v_left: %.2f]" % (v_right, v_left))
         self.create.drive_direct(v_right, v_left)
 
-    def sweep_sonar(self, degree, sleep_time: float = 1.0, interrupt=lambda x: False) -> float:
+    def sweep_sonar(self, turn_angle, sleep_time: float = 1.0, interrupt=lambda x: False) -> float:
         curr_angle = math.degrees(self.odometry.theta)
 
         min_dist_to_wall = math.inf
 
-        self.servo.go_to(curr_angle - degree)
-        dist = self.sleep(sleep_time, is_get_dist=True, interrupt=interrupt)
-        if interrupt(dist):
-            return dist
-        min_dist_to_wall = min(min_dist_to_wall, dist, self.sonar.get_distance())
-
-        self.servo.go_to(curr_angle + degree)
+        self.servo.go_to(curr_angle - turn_angle)
         dist = self.sleep(sleep_time, is_get_dist=True, interrupt=interrupt)
         if interrupt(dist):
             return dist
@@ -102,6 +96,15 @@ class Run:
         if interrupt(dist):
             return dist
         min_dist_to_wall = min(min_dist_to_wall, dist, self.sonar.get_distance())
+
+        self.servo.go_to(curr_angle + turn_angle)
+        dist = self.sleep(sleep_time, is_get_dist=True, interrupt=interrupt)
+        if interrupt(dist):
+            return dist
+        min_dist_to_wall = min(min_dist_to_wall, dist, self.sonar.get_distance())
+
+        self.servo.go_to(curr_angle)
+        self.sleep(sleep_time)
 
         return min_dist_to_wall
 
