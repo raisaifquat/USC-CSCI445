@@ -163,7 +163,7 @@ class Run:
                     curr_state = State.go_to_goal
                     self.go_to_goal(goal_x, goal_y)
                     dist_to_wall = self.sonar.get_distance()
-                    curr_angle = math.degrees(self.odometry.theta)
+                    # curr_angle = math.degrees(self.odometry.theta)
                     # curr_robot_angle = (((curr_angle + 90) % 180) - 90)
                     # dist_to_wall = self.sweep_sonar(sonar_sweep_angle, sonar_sweep_sleep_time, curr_robot_angle)
 
