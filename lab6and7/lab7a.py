@@ -181,9 +181,9 @@ class Run:
                     # self.sleep(wall_follow_timeout)
                     self.create.drive_direct(0, 0)
                     curr_angle = math.degrees(self.odometry.theta)
-                    curr_sonar_angle = -(((curr_angle + 90) % 180) - 90)
+                    curr_sonar_angle = (((-curr_angle + 90) % 180) - 90)
                     print("end [curr_angle: %.4f, curr_sonar_angle: %.4f]\n" % (curr_angle, curr_sonar_angle))
-                    self.sweep_sonar(60, 0, 1.3, is_get_dist_while_turning=True,
+                    self.sweep_sonar(60, curr_sonar_angle, 1.3, is_get_dist_while_turning=True,
                                      interrupt=go_to_goal_interrupt)
                     curr_state = State.init
 

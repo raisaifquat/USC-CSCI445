@@ -148,26 +148,12 @@ class Run:
                 dist_to_wall = self.sonar.get_distance()
                 print("dist_to_goal: %.4f" % self.get_dist_to_goal(goal_x, goal_y))
 
-                while dist_to_wall is not None and dist_to_wall > wall_threshold:
+                if dist_to_wall is not None and dist_to_wall > wall_threshold:
                     print("gtg [dist_to_wall: %.4f]\n" % dist_to_wall)
 
                     self.go_to_angle(0, 0.1)
-
-                    curr_state = State.go_to_goal
                     self.go_to_goal(goal_x, goal_y)
-                    dist_to_wall = self.sonar.get_distance()
-                    # curr_angle = math.degrees(self.odometry.theta)
-                    # curr_robot_angle = (((curr_angle + 90) % 180) - 90)
-                    # dist_to_wall = self.sweep_sonar(sonar_sweep_angle, sonar_sweep_sleep_time, curr_robot_angle)
-
-                dist_to_wall = self.sonar.get_distance()
-                while dist_to_wall is not None and dist_to_wall <= wall_threshold:
-                    if self.get_dist_to_goal(goal_x, goal_y) <= dist_threshold:
-                        curr_state = State.finished
-                        break
-
-                    curr_state = State.wall_following
-
+                elif dist_to_wall is not None and dist_to_wall <= wall_threshold:
                     self.follow_wall(dist_to_wall, goal_dist_to_wall, base_speed=base_speed)
 
                     curr_angle = math.degrees(self.odometry.theta)
@@ -175,17 +161,14 @@ class Run:
                     print("fw [dist_to_wall: %.4f,\ncurr_angle: %.4f," % (dist_to_wall, curr_angle))
                     print("turn_angle: %.4f]\n" % turn_angle)
                     self.go_to_angle(turn_angle, 0.1)
-                    dist_to_wall = self.sonar.get_distance()
-
-                if curr_state is State.wall_following:
+                else:
                     # self.sleep(wall_follow_timeout)
                     self.create.drive_direct(0, 0)
                     curr_angle = math.degrees(self.odometry.theta)
-                    curr_sonar_angle = -(((curr_angle + 90) % 180) - 90)
+                    curr_sonar_angle = (((-curr_angle + 90) % 180) - 90)
                     print("end [curr_angle: %.4f, curr_sonar_angle: %.4f]\n" % (curr_angle, curr_sonar_angle))
                     self.sweep_sonar(60, 0, 1.3, is_get_dist_while_turning=True,
                                      interrupt=go_to_goal_interrupt)
-                    curr_state = State.init
 
         print("Arrived @[{%.4f},{%.4f},{%.4f}]\n" % (
             self.odometry.x, self.odometry.y, math.degrees(self.odometry.theta)))
