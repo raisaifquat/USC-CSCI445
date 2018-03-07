@@ -143,6 +143,7 @@ class Run:
                 print("dist_to_goal: %.4f" % self.get_dist_to_goal(goal_x, goal_y))
 
                 while dist_to_wall is not None and dist_to_wall > wall_threshold:
+                    print("gtg [dist_to_wall: %.4f]\n" % dist_to_wall)
 
                     # self.go_to_angle(0, 0.01)
 
