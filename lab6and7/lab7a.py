@@ -5,6 +5,7 @@ from enum import Enum
 
 import odometry
 import pid_controller
+from utils import clamp
 
 
 class State(Enum):
@@ -58,6 +59,7 @@ class Run:
         min_dist_to_wall = math.inf
 
         for angle in (curr_angle - turn_angle, curr_angle, curr_angle + turn_angle):
+            angle = clamp(angle, -90, 90)
             print("sweeping sonar to: %.2f" % angle)
             self.go_to_angle(angle, sleep_time)
             dist = self.sonar.get_distance()
@@ -177,7 +179,7 @@ class Run:
                     curr_angle = math.degrees(self.odometry.theta)
                     curr_sonar_angle = -(((curr_angle + 90) % 180) - 90)
                     print("end [curr_angle: %.4f, curr_sonar_angle: %.4f]\n" % (curr_angle, curr_sonar_angle))
-                    self.sweep_sonar(60, 0, 1.5, interrupt=go_to_goal_interrupt)
+                    self.sweep_sonar(30, curr_sonar_angle, 1.0, interrupt=go_to_goal_interrupt)
                     curr_state = State.init
 
         print("Arrived @[{%.4f},{%.4f},{%.4f}]\n" % (
