@@ -8,7 +8,7 @@ import pid_controller
 
 
 class State(Enum):
-    init_go_to_goal = 0,
+    init = 0,
     go_to_goal = 1,
     init_wall_following = 2,
     wall_following = 3,
@@ -144,7 +144,7 @@ class Run:
             curr_state = State.go_to_goal
 
             print("Going to @{%.4f, %.4f}" % (goal_x, goal_y))
-
+            prev_angle = math.degrees(self.odometry.theta)
             while self.get_dist_to_goal(goal_x, goal_y) > dist_threshold:
                 dist_to_wall = self.sonar.get_distance()
                 curr_angle = math.degrees(self.odometry.theta)
@@ -153,7 +153,6 @@ class Run:
                 # print("dist_to_wall: %.4f" % dist_to_wall)
                 print("dist_to_goal: %.4f" % self.get_dist_to_goal(goal_x, goal_y))
                 # self.go_to_angle(curr_sonar_angle, sonar_sweep_sleep_time)
-
                 while (dist_to_wall is not None and dist_to_wall > wall_threshold
                        and curr_state is not State.finished):
                     if self.get_dist_to_goal(goal_x, goal_y) <= dist_threshold:
@@ -165,10 +164,7 @@ class Run:
                     curr_state = State.go_to_goal
                     self.go_to_goal(goal_x, goal_y)
                     dist_to_wall = self.sonar.get_distance()
-                    # curr_angle = math.degrees(self.odometry.theta)
-                    # curr_robot_angle = (((curr_angle + 90) % 180) - 90)
-                    # dist_to_wall = self.sweep_sonar(sonar_sweep_angle, sonar_sweep_sleep_time, curr_robot_angle)
-
+                    
                 dist_to_wall = self.sonar.get_distance()
                 prev_angle = math.degrees(self.odometry.theta)
                 while (dist_to_wall is not None and dist_to_wall <= goal_dist_to_wall
@@ -191,6 +187,7 @@ class Run:
 
                 if curr_state is State.wall_following:
                     self.sleep(wall_follow_timeout)
+                    curr_state = State.init
                     # start_time = self.time.time()
                     # dist_to_wall = self.sonar.get_distance()
                     # while self.time.time() - start_time < wall_follow_timeout:
