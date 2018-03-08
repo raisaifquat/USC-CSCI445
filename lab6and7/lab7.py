@@ -124,10 +124,8 @@ class Run:
 
         dist_threshold = 0.3
         wall_threshold = 0.7
-        goal_dist_to_wall = wall_threshold - 0.1
-        wall_follow_timeout = 0.5
-        sonar_sweep_angle = 10
-        sonar_sweep_sleep_time = 0.2
+        goal_dist_to_wall = wall_threshold - 0.2
+        wall_follow_timeout = 1.0
 
         def go_to_goal_interrupt(dist_):
             return dist_ <= wall_threshold
@@ -152,14 +150,14 @@ class Run:
                     if self.get_dist_to_goal(goal_x, goal_y) <= dist_threshold:
                         curr_state = State.finished
                         break
+
                     print("gtg [dist_to_wall: %.4f]\n" % dist_to_wall)
 
                     self.go_to_angle(0, 0.1)
 
                     curr_state = State.go_to_goal
                     self.go_to_goal(goal_x, goal_y)
-                    dist_to_wall = self.sweep_sonar(5, 0, 0.2)
-                    # dist_to_wall = self.sonar.get_distance()
+                    dist_to_wall = self.sonar.get_distance()
 
                 prev_angle = math.degrees(self.odometry.theta)
                 dist_to_wall = self.sonar.get_distance()
@@ -184,10 +182,9 @@ class Run:
                     self.create.drive_direct(0, 0)
                     curr_angle = math.degrees(self.odometry.theta)
                     # turn_angle = (((-curr_angle + 90) % 180) - 90)
-                    # turn_angle = -(curr_angle - prev_angle)
-                    turn_angle = 0
+                    turn_angle = -(curr_angle - prev_angle)
                     print("end [curr_angle: %.4f, curr_sonar_angle: %.4f]\n" % (curr_angle, turn_angle))
-                    self.sweep_sonar(45, turn_angle, 1.5, is_get_dist_while_turning=True,
+                    self.sweep_sonar(45, turn_angle, 1.0, is_get_dist_while_turning=True,
                                      interrupt=go_to_goal_interrupt)
                     curr_state = State.init
 
