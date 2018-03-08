@@ -124,7 +124,7 @@ class Run:
 
         dist_threshold = 0.3
         wall_threshold = 0.7
-        goal_dist_to_wall = wall_threshold - 0.2
+        goal_dist_to_wall = wall_threshold - 0.1
         wall_follow_timeout = 0.5
         sonar_sweep_angle = 10
         sonar_sweep_sleep_time = 0.2

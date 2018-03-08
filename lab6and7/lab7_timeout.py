@@ -8,7 +8,7 @@ import pid_controller
 
 
 class State(Enum):
-    init = 0,
+    init_go_to_goal = 0,
     go_to_goal = 1,
     init_wall_following = 2,
     wall_following = 3,
@@ -92,7 +92,7 @@ class Run:
 
             v_right = int(output_theta + output_distance)
             v_left = int(-output_theta + output_distance)
-            print("gtg [v_right: %.2f, v_left: %.2f]" % (v_right, v_left))
+            # print("gtg [v_right: %.2f, v_left: %.2f]" % (v_right, v_left))
             self.create.drive_direct(v_right, v_left)
 
     def follow_wall(self, dist_to_wall: float, goal_dist_to_wall: float, base_speed: float = 100.0) -> None:
@@ -127,8 +127,8 @@ class Run:
 
         dist_threshold = 0.3
         wall_threshold = 0.4 + self.odometry.w / 2
-        goal_dist_to_wall = wall_threshold - 0.1
-        wall_follow_timeout = 1.0
+        goal_dist_to_wall = wall_threshold + 0.1
+        wall_follow_timeout = 0.7
 
         def go_to_goal_interrupt(dist_):
             return dist_ <= wall_threshold
@@ -144,9 +144,16 @@ class Run:
             curr_state = State.go_to_goal
 
             print("Going to @{%.4f, %.4f}" % (goal_x, goal_y))
-            prev_angle = math.degrees(self.odometry.theta)
+
             while self.get_dist_to_goal(goal_x, goal_y) > dist_threshold:
                 dist_to_wall = self.sonar.get_distance()
+                curr_angle = math.degrees(self.odometry.theta)
+                # curr_robot_angle = (((curr_angle + 90) % 180) - 90)
+                # dist_to_wall = self.sweep_sonar(sonar_sweep_angle, sonar_sweep_sleep_time, curr_robot_angle)
+                # print("dist_to_wall: %.4f" % dist_to_wall)
+                print("dist_to_goal: %.4f" % self.get_dist_to_goal(goal_x, goal_y))
+                # self.go_to_angle(curr_sonar_angle, sonar_sweep_sleep_time)
+
                 while (dist_to_wall is not None and dist_to_wall > wall_threshold
                        and curr_state is not State.finished):
                     if self.get_dist_to_goal(goal_x, goal_y) <= dist_threshold:
@@ -157,16 +164,14 @@ class Run:
 
                     curr_state = State.go_to_goal
                     self.go_to_goal(goal_x, goal_y)
-                    print("gtg [dist_to_goal: %.4f]\n" % self.get_dist_to_goal(goal_x, goal_y))
                     dist_to_wall = self.sonar.get_distance()
                     # curr_angle = math.degrees(self.odometry.theta)
                     # curr_robot_angle = (((curr_angle + 90) % 180) - 90)
                     # dist_to_wall = self.sweep_sonar(sonar_sweep_angle, sonar_sweep_sleep_time, curr_robot_angle)
 
                 dist_to_wall = self.sonar.get_distance()
-                if curr_state is not State.go_to_goal:
-                    prev_angle = math.degrees(self.odometry.theta)
-                while (dist_to_wall is not None and dist_to_wall <= wall_threshold
+                prev_angle = math.degrees(self.odometry.theta)
+                while (dist_to_wall is not None and dist_to_wall <= goal_dist_to_wall
                        and curr_state is not State.finished):
                     if self.get_dist_to_goal(goal_x, goal_y) <= dist_threshold:
                         curr_state = State.finished
@@ -177,7 +182,6 @@ class Run:
                     self.follow_wall(dist_to_wall, goal_dist_to_wall, base_speed=base_speed)
 
                     curr_angle = math.degrees(self.odometry.theta)
-                    print("fw [dist_to_goal: %.4f]\n" % self.get_dist_to_goal(goal_x, goal_y))
                     print("fw [dist_to_wall: %.4f]\nfw [curr_angle: %.4f]\n" % (dist_to_wall, curr_angle))
 
                     # turn_angle = -(((curr_angle + 90) % 180) - 90)

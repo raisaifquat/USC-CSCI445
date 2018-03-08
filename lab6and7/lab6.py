@@ -48,7 +48,7 @@ class Run:
 
             print("Going to @{%.4f, %.4f}" % (goal_x, goal_y))
             distance = math.sqrt(math.pow(goal_x - self.odometry.x, 2) + math.pow(goal_y - self.odometry.y, 2))
-            while distance > 0.01:
+            while distance > 0.05:
                 state = self.create.update()
                 if state is not None:
                     self.odometry.update(state.leftEncoderCounts, state.rightEncoderCounts)
