@@ -161,7 +161,15 @@ class Run:
 
                 prev_angle = math.degrees(self.odometry.theta)
                 dist_to_wall = self.sonar.get_distance()
+                is_start_timer = False
+                start_time = self.time.time()
                 while dist_to_wall is not None and dist_to_wall <= wall_threshold:
+                # while True:
+                #     if dist_to_wall is None or dist_to_wall > wall_threshold:
+                #         is_start_timer = True
+                #         start_time = self.time.time()
+                #     if is_start_timer and self.time.time() - start_time > wall_follow_timeout:
+                #         break
                     if self.get_dist_to_goal(goal_x, goal_y) <= dist_threshold:
                         curr_state = State.finished
                         break
@@ -178,7 +186,7 @@ class Run:
                     dist_to_wall = self.sonar.get_distance()
 
                 if curr_state is State.wall_following:
-                    self.sleep(wall_follow_timeout)
+                    # self.sleep(wall_follow_timeout)
                     self.create.drive_direct(0, 0)
                     curr_angle = math.degrees(self.odometry.theta)
                     # turn_angle = (((-curr_angle + 90) % 180) - 90)

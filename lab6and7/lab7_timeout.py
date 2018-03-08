@@ -126,9 +126,11 @@ class Run:
         ])
 
         dist_threshold = 0.3
-        wall_threshold = 0.4 + self.odometry.w / 2
-        goal_dist_to_wall = wall_threshold + 0.1
-        wall_follow_timeout = 0.7
+        # wall_threshold = 0.4 + self.odometry.w / 2
+        # goal_dist_to_wall = wall_threshold + 0.1
+        wall_threshold = 0.7
+        goal_dist_to_wall = wall_threshold - 0.1
+        wall_follow_timeout = 1.0
 
         def go_to_goal_interrupt(dist_):
             return dist_ <= wall_threshold
@@ -168,7 +170,7 @@ class Run:
                 dist_to_wall = self.sonar.get_distance()
                 if curr_state is not State.init:
                     prev_angle = math.degrees(self.odometry.theta)
-                while (dist_to_wall is not None and dist_to_wall <= goal_dist_to_wall
+                while (dist_to_wall is not None and dist_to_wall <= wall_threshold
                        and curr_state is not State.finished):
                     if self.get_dist_to_goal(goal_x, goal_y) <= dist_threshold:
                         curr_state = State.finished
