@@ -183,7 +183,8 @@ class Run:
                     self.create.drive_direct(0, 0)
                     curr_angle = math.degrees(self.odometry.theta)
                     # turn_angle = (((-curr_angle + 90) % 180) - 90)
-                    turn_angle = -(curr_angle - prev_angle)
+                    # turn_angle = -(curr_angle - prev_angle)
+                    turn_angle = 0
                     print("end [curr_angle: %.4f, curr_sonar_angle: %.4f]\n" % (curr_angle, turn_angle))
                     self.sweep_sonar(45, turn_angle, 1.5, is_get_dist_while_turning=True,
                                      interrupt=go_to_goal_interrupt)
