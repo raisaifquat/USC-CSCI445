@@ -73,21 +73,25 @@ class Run:
 
         return min_dist_to_wall
 
-    def go_to_goal(self, goal_x: float, goal_y: float) -> None:
+    def go_to_goal(self, goal_x: float, goal_y: float):
         state = self.create.update()
-        if state is not None:
-            self.odometry.update(state.leftEncoderCounts, state.rightEncoderCounts)
+        if state is None:
+            return None
 
-            goal_theta = math.atan2(goal_y - self.odometry.y, goal_x - self.odometry.x)
-            output_theta = self.pidTheta.update(self.odometry.theta, goal_theta, self.time.time())
+        self.odometry.update(state.leftEncoderCounts, state.rightEncoderCounts)
 
-            dist_to_goal = self.get_dist_to_goal(goal_x, goal_y)
-            output_distance = self.pidDistance.update(0, dist_to_goal, self.time.time())
+        goal_theta = math.atan2(goal_y - self.odometry.y, goal_x - self.odometry.x)
+        output_theta = self.pidTheta.update(self.odometry.theta, goal_theta, self.time.time())
 
-            v_right = int(output_theta + output_distance)
-            v_left = int(-output_theta + output_distance)
-            # print("gtg [v_right: %.2f, v_left: %.2f]" % (v_right, v_left))
-            self.create.drive_direct(v_right, v_left)
+        dist_to_goal = self.get_dist_to_goal(goal_x, goal_y)
+        output_distance = self.pidDistance.update(0, dist_to_goal, self.time.time())
+
+        v_right = int(output_theta + output_distance)
+        v_left = int(-output_theta + output_distance)
+        # print("gtg [v_right: %.2f, v_left: %.2f]" % (v_right, v_left))
+        self.create.drive_direct(v_right, v_left)
+
+        return goal_theta
 
     def follow_wall(self, dist_to_wall: float, goal_dist_to_wall: float, base_speed: float = 100.0) -> None:
         state = self.create.update()
@@ -140,7 +144,7 @@ class Run:
             curr_state = State.go_to_goal
 
             print("-----------------\nGoing to @{%.4f, %.4f}" % (goal_x, goal_y))
-            prev_angle = math.degrees(self.odometry.theta)
+            angle_counter = 0
             while self.get_dist_to_goal(goal_x, goal_y) > dist_threshold:
                 dist_to_wall = self.sonar.get_distance()
                 print("dist_to_goal: %.4f" % self.get_dist_to_goal(goal_x, goal_y))
@@ -151,15 +155,24 @@ class Run:
                         curr_state = State.finished
                         break
 
-                    self.go_to_angle(0, 0.01)
+                    # self.go_to_angle(0, 0.01)
 
                     curr_state = State.go_to_goal
                     self.go_to_goal(goal_x, goal_y)
+
+                    goal_theta = math.atan2(goal_y - self.odometry.y, goal_x - self.odometry.x)
+                    goal_theta = math.degrees(goal_theta)
+                    curr_angle = math.degrees(self.odometry.theta)
+                    # turn_angle = (goal_theta - curr_angle) % 360
+                    print("gtg [goal_theta: %.4f,\ncurr_angle: %.4f" % (goal_theta, curr_angle))
+                    turn_angle = (goal_theta - curr_angle)
+                    print("turn_angle: %.4f]\n" % turn_angle)
+                    self.go_to_angle(-turn_angle * 1.2, 0.1)
+
                     dist_to_wall = self.sonar.get_distance()
 
                 dist_to_wall = self.sonar.get_distance()
                 prev_angle = math.degrees(self.odometry.theta)
-
                 while (dist_to_wall is not None and dist_to_wall <= wall_threshold
                        and curr_state is not State.finished):
                     if self.get_dist_to_goal(goal_x, goal_y) <= dist_threshold:
@@ -170,17 +183,13 @@ class Run:
 
                     self.follow_wall(dist_to_wall, goal_dist_to_wall, base_speed=base_speed)
 
-                    curr_angle = math.degrees(self.odometry.theta)
-                    print("fw [dist_to_wall: %.4f]\nfw [curr_angle: %.4f]\n" % (dist_to_wall, curr_angle))
-
-                    # turn_angle = -(((curr_angle + 90) % 180) - 90)
-                    turn_angle = -(curr_angle - prev_angle)
-                    self.go_to_angle(turn_angle, 0.1)
+                    turn_angle = math.degrees(self.odometry.theta) - prev_angle
+                    self.go_to_angle(-turn_angle, 0.1)
                     dist_to_wall = self.sonar.get_distance()
 
-                if curr_state is State.wall_following:
-                    self.sleep(wall_follow_timeout)
-                    curr_state = State.init
+                # if curr_state is State.wall_following:
+                #     self.sleep(wall_follow_timeout)
+                #     curr_state = State.init
 
                 print("-----------------\nArrived @[{%.4f},{%.4f},{%.4f}]\n" % (
                     self.odometry.x, self.odometry.y, math.degrees(self.odometry.theta)))
