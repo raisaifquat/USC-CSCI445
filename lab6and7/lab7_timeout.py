@@ -143,7 +143,7 @@ class Run:
             base_speed = 100
             curr_state = State.go_to_goal
 
-            print("Going to @{%.4f, %.4f}" % (goal_x, goal_y))
+            print("-----------------\nGoing to @{%.4f, %.4f}" % (goal_x, goal_y))
             prev_angle = math.degrees(self.odometry.theta)
             while self.get_dist_to_goal(goal_x, goal_y) > dist_threshold:
                 dist_to_wall = self.sonar.get_distance()
@@ -164,9 +164,10 @@ class Run:
                     curr_state = State.go_to_goal
                     self.go_to_goal(goal_x, goal_y)
                     dist_to_wall = self.sonar.get_distance()
-                    
+
                 dist_to_wall = self.sonar.get_distance()
-                prev_angle = math.degrees(self.odometry.theta)
+                if curr_state is not State.init:
+                    prev_angle = math.degrees(self.odometry.theta)
                 while (dist_to_wall is not None and dist_to_wall <= goal_dist_to_wall
                        and curr_state is not State.finished):
                     if self.get_dist_to_goal(goal_x, goal_y) <= dist_threshold:
@@ -188,19 +189,6 @@ class Run:
                 if curr_state is State.wall_following:
                     self.sleep(wall_follow_timeout)
                     curr_state = State.init
-                    # start_time = self.time.time()
-                    # dist_to_wall = self.sonar.get_distance()
-                    # while self.time.time() - start_time < wall_follow_timeout:
-                    #     if self.get_dist_to_goal(goal_x, goal_y) <= dist_threshold:
-                    #         curr_state = State.finished
-                    #         break
-                    #
-                    #     self.follow_wall(dist_to_wall, goal_dist_to_wall, base_speed=base_speed)
-                    #
-                    #     curr_angle = math.degrees(self.odometry.theta)
-                    #     turn_angle = -(((curr_angle + 90) % 180) - 90)
-                    #     self.go_to_angle(turn_angle, 0.1)
-                    #     dist_to_wall = self.sonar.get_distance()
 
-        print("Arrived @[{%.4f},{%.4f},{%.4f}]\n" % (
-            self.odometry.x, self.odometry.y, math.degrees(self.odometry.theta)))
+            print("-----------------\nArrived @[{%.4f},{%.4f},{%.4f}]\n" % (
+                self.odometry.x, self.odometry.y, math.degrees(self.odometry.theta)))
