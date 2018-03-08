@@ -80,7 +80,7 @@ class Run:
 
         curr_angle = 0.0
         degree = 30
-        wait_time = 0.5
+        wait_time = 1.0
         threshold = 0.908
 
         turn_angle = curr_angle - degree
@@ -89,13 +89,13 @@ class Run:
         self.sleep(wait_time)
         print(self.sonar.get_distance())
 
-        turn_angle = curr_angle + degree
+        turn_angle = curr_angle
         self.servo.go_to(turn_angle)
         # self.time.sleep(wait_time)
         self.sleep(wait_time)
         print(self.sonar.get_distance())
 
-        turn_angle = curr_angle
+        turn_angle = curr_angle + degree
         self.servo.go_to(turn_angle)
         # self.time.sleep(wait_time)
         self.sleep(wait_time)
