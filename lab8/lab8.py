@@ -1,6 +1,6 @@
 import lab8_map
 import math
-
+import particle_filter
 
 class Run:
     def __init__(self, factory):
@@ -16,31 +16,34 @@ class Run:
         # Add the IP-address of your computer here if you run on the robot
         self.virtual_create = factory.create_virtual_create()
         self.map = lab8_map.Map("lab8_map.json")
+        self.filter = particle_filter.ParticleFilter(self.virtual_create, 100)
 
     def run(self):
-        # This is an example on how to visualize the pose of our estimated position
-        # where our estimate is that the robot is at (x,y,z)=(0.5,0.5,0.1) with heading pi
-        self.virtual_create.set_pose((0.5, 0.5, 0.1), 0)
+        # # This is an example on how to visualize the pose of our estimated position
+        # # where our estimate is that the robot is at (x,y,z)=(0.5,0.5,0.1) with heading pi
+        # self.virtual_create.set_pose((0.5, 0.5, 0.1), 0)
+        #
+        # # This is an example on how to show particles
+        # # the format is x,y,z,theta,x,y,z,theta,...
+        # data = [0.5, 0.5, 0.1, math.pi/2, 1.5, 1, 0.1, 0]
+        # self.virtual_create.set_point_cloud(data)
+        #
+        # # This is an example on how to estimate the distance to a wall for the given
+        # # map, assuming the robot is at (0, 0) and has heading math.pi
+        # print(self.map.closest_distance((0.5,0.5), 0))
+        #
+        # # This is an example on how to detect that a button was pressed in V-REP
+        # while True:
+        #     b = self.virtual_create.get_last_button()
+        #     if b == self.virtual_create.Button.MoveForward:
+        #         print("Forward pressed!")
+        #     elif b == self.virtual_create.Button.TurnLeft:
+        #         print("Turn Left pressed!")
+        #     elif b == self.virtual_create.Button.TurnRight:
+        #         print("Turn Right pressed!")
+        #     elif b == self.virtual_create.Button.Sense:
+        #         print("Sense pressed!")
+        #
+        #     self.time.sleep(0.01)
 
-        # This is an example on how to show particles
-        # the format is x,y,z,theta,x,y,z,theta,...
-        data = [0.5, 0.5, 0.1, math.pi/2, 1.5, 1, 0.1, 0]
-        self.virtual_create.set_point_cloud(data)
 
-        # This is an example on how to estimate the distance to a wall for the given
-        # map, assuming the robot is at (0, 0) and has heading math.pi
-        print(self.map.closest_distance((0.5,0.5), 0))
-
-        # This is an example on how to detect that a button was pressed in V-REP
-        while True:
-            b = self.virtual_create.get_last_button()
-            if b == self.virtual_create.Button.MoveForward:
-                print("Forward pressed!")
-            elif b == self.virtual_create.Button.TurnLeft:
-                print("Turn Left pressed!")
-            elif b == self.virtual_create.Button.TurnRight:
-                print("Turn Right pressed!")
-            elif b == self.virtual_create.Button.Sense:
-                print("Sense pressed!")
-
-            self.time.sleep(0.01)
