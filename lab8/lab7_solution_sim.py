@@ -5,10 +5,10 @@ import pd_controller2
 import pid_controller
 from enum import Enum
 
-class Mode(Enum):
-    GoToGoal   = 1
-    WallFollow = 2
 
+class Mode(Enum):
+    GoToGoal = 1
+    WallFollow = 2
 
 
 class Run:
