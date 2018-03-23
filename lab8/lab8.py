@@ -1,3 +1,4 @@
+from pyCreate2 import create2
 import lab8_map
 import math
 from particle_filter import ParticleFilter
@@ -53,6 +54,15 @@ class Run:
         #         print("Sense pressed!")
         #
         #     self.time.sleep(0.01)
+        self.create.start()
+        self.create.safe()
+
+        # request sensors
+        self.create.start_stream([
+            create2.Sensor.LeftEncoderCounts,
+            create2.Sensor.RightEncoderCounts,
+        ])
+
         self.filter.drawParticles()
         # This is an example on how to detect that a button was pressed in V-REP
         while True:
@@ -66,7 +76,7 @@ class Run:
             elif b == self.virtual_create.Button.TurnRight:
                 self.filter.move(90, 0)
             elif b == self.virtual_create.Button.Sense:
-                self.filter.sense()
+                self.filter.sense(self.sonar.get_distance())
 
             self.sleep(0.01)
 

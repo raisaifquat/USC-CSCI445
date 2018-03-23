@@ -1,5 +1,6 @@
 import numpy as np
 from particle import Particle
+from scipy.special import logsumexp
 
 
 class ParticleFilter:
@@ -30,7 +31,8 @@ class ParticleFilter:
             x = np.random.uniform(0, self.world_width)
             y = np.random.uniform(0, self.world_height)
             theta = np.random.uniform(0, 2 * np.pi)
-            particle = Particle(self.create, x, y, 1 / self.numParticles, theta, self.variance_sensor, self.variance_distance,
+            particle = Particle(self.create, x, y, 1 / self.numParticles, theta, self.variance_sensor,
+                                self.variance_distance,
                                 self.variance_direction, go_to_angle=go_to_angle, sleep=self.sleep)
 
             self.particles.append(particle)
@@ -39,19 +41,21 @@ class ParticleFilter:
         return np.random.choice(self.particles, self.numParticles, replace=True, p=self.weights)
 
     def move(self, turn, distance):
+        if turn == 0 and distance == 0:
+            return
+
         for particle in self.particles:
             particle.move(turn, distance)
 
-    def sense(self):
-        normalize_factor = 0.0
+        self.estimate()
 
+    def sense(self, sensor_reading):
         i = -1
         for particle in self.particles:
-            weight = particle.sense()
-            normalize_factor += weight
+            weight = particle.sense(sensor_reading)
             self.weights[++i] = weight
 
-        self.particles /= normalize_factor
+        self.weights -= logsumexp(self.weights)
         self.particles = self.resample()
 
     def drawParticles(self):
@@ -73,4 +77,3 @@ class ParticleFilter:
         # draw the estimated position and all other particles
         self.virtual_create.set_pose((x_avg, y_avg, 0.1), theta_avg)
         self.drawParticles()
-

@@ -40,8 +40,9 @@ class Particle:
 
         if turn != 0:
             self.go_to_angle(self.theta)
-        self.create.drive_direct(100, 100)
-        self.sleep(dist / 100)
+        if distance != 0:
+            self.create.drive_direct(100, 100)
+            self.sleep(dist / 100)
 
     def sense(self, sensor_reading):
         # calculate posterior probability for this particle
