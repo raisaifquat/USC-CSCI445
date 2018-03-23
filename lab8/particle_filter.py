@@ -75,7 +75,7 @@ class ParticleFilter:
 
         self.particles = self.resample()
 
-    def drawParticles(self):
+    def draw_particles(self):
         data = []
 
         # get position data from all particles
@@ -93,4 +93,3 @@ class ParticleFilter:
 
         # draw the estimated position and all other particles
         self.virtual_create.set_pose((x_avg, y_avg, 0.1), theta_avg)
-        self.drawParticles()

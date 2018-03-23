@@ -63,9 +63,9 @@ class Run:
             create2.Sensor.RightEncoderCounts,
         ])
 
-        self.filter.drawParticles()
         # This is an example on how to detect that a button was pressed in V-REP
         while True:
+            self.filter.draw_particles()
             b = self.virtual_create.get_last_button()
             if b == self.virtual_create.Button.MoveForward:
                 self.filter.move(0, 0.5)
