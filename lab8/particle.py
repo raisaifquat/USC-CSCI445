@@ -1,14 +1,21 @@
 import numpy as np
 import lab8_map
 from scipy.stats import norm
+import math
 
 
 class Particle:
-    def __init__(self, x, y, prev_prob, theta, sd_sensor, sd_distance, sd_direction):
+    def __init__(self, create, x, y, prev_prob, theta, sd_sensor, sd_distance, sd_direction, go_to_angle, sleep):
+        self.create = create
+
+        # turn and move function
+        self.go_to_angle = go_to_angle
+        self.sleep = sleep
+
+        # coordination
         self.x = x
         self.y = y
         self.prev_prob = prev_prob
-        self.d = 0.0
         self.theta = theta
 
         # constant
@@ -31,9 +38,15 @@ class Particle:
         self.x = self.x + dist * np.cos(self.theta)
         self.y = self.y - dist * np.sin(self.theta)
 
+        if turn != 0:
+            self.go_to_angle(self.theta)
+        self.create.drive_direct(100, 100)
+        self.sleep(dist / 100)
+
     def sense(self, sensor_reading):
         # calculate posterior probability for this particle
         p_robot_at_location = self.map.closest_distance((self.x, self.y), self.theta)
 
         p_z_given_robot_at_location = norm.pdf(sensor_reading, loc=p_robot_at_location, scale=self.sd_sensor)
+        return math.log(p_z_given_robot_at_location) + math.log(self.prev_prob)
 

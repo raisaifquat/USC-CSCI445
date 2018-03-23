@@ -3,8 +3,13 @@ from particle import Particle
 
 
 class ParticleFilter:
-    def __init__(self, virtual_create, num_particles):
+    def __init__(self, create, virtual_create, go_to_angle, num_particles, sleep):
+        self.create = create
         self.virtual_create = virtual_create
+
+        # odometry and turn function
+        self.go_to_angle = go_to_angle
+        self.sleep = sleep
 
         # constant
         self.variance_sensor = 0.1
@@ -25,8 +30,8 @@ class ParticleFilter:
             x = np.random.uniform(0, self.world_width)
             y = np.random.uniform(0, self.world_height)
             theta = np.random.uniform(0, 2 * np.pi)
-            particle = Particle(x, y, 1 / self.numParticles, theta, self.variance_sensor, self.variance_distance,
-                                self.variance_direction)
+            particle = Particle(self.create, x, y, 1 / self.numParticles, theta, self.variance_sensor, self.variance_distance,
+                                self.variance_direction, go_to_angle=go_to_angle, sleep=self.sleep)
 
             self.particles.append(particle)
 

@@ -1,8 +1,8 @@
 import lab8_map
 import math
-import particle_filter
-import odometry
-import pid_controller
+from particle_filter import ParticleFilter
+from odometry import Odometry
+from pid_controller import PIDController
 
 
 class Run:
@@ -19,10 +19,12 @@ class Run:
         # Add the IP-address of your computer here if you run on the robot
         self.virtual_create = factory.create_virtual_create()
         self.map = lab8_map.Map("lab8_map.json")
-        self.filter = particle_filter.ParticleFilter(self.virtual_create, 100)
 
-        self.odometry = odometry.Odometry()
-        self.pidTheta = pid_controller.PIDController(300, 5, 50, [-10, 10], [-200, 200], is_angle=True)
+        self.odometry = Odometry()
+        self.pidTheta = PIDController(300, 5, 50, [-10, 10], [-200, 200], is_angle=True)
+
+        self.filter = ParticleFilter(self.create, self.virtual_create, self.go_to_angle, num_particles=100,
+                                     sleep=self.sleep)
 
     def run(self):
         # # This is an example on how to visualize the pose of our estimated position
@@ -57,7 +59,6 @@ class Run:
             b = self.virtual_create.get_last_button()
             if b == self.virtual_create.Button.MoveForward:
                 self.filter.move(0, 0.5)
-                self.sleep()
                 self.create.drive_direct(0, 0)
 
             elif b == self.virtual_create.Button.TurnLeft:
@@ -67,13 +68,12 @@ class Run:
             elif b == self.virtual_create.Button.Sense:
                 self.filter.sense()
 
-            self.time.sleep(0.01)
+            self.sleep(0.01)
 
     def go_to_angle(self, goal_theta):
         while math.fabs(math.atan2(
                 math.sin(goal_theta - self.odometry.theta),
                 math.cos(goal_theta - self.odometry.theta))) > 0.1:
-
             print("Go TO: " + str(goal_theta) + " " + str(self.odometry.theta))
             output_theta = self.pidTheta.update(self.odometry.theta, goal_theta, self.time.time())
             self.create.drive_direct(int(+output_theta), int(-output_theta))
