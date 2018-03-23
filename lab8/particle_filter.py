@@ -1,6 +1,8 @@
 import numpy as np
 from particle import Particle
 from scipy.special import logsumexp
+import math
+import copy
 
 
 class ParticleFilter:
@@ -31,14 +33,25 @@ class ParticleFilter:
             x = np.random.uniform(0, self.world_width)
             y = np.random.uniform(0, self.world_height)
             theta = np.random.uniform(0, 2 * np.pi)
-            particle = Particle(self.create, x, y, 1 / self.numParticles, theta, self.variance_sensor,
-                                self.variance_distance,
-                                self.variance_direction, go_to_angle=go_to_angle, sleep=self.sleep)
+            prev_log_prob = math.log(1 / self.numParticles)
+
+            particle = Particle(self.create, x, y, prev_log_prob, theta,
+                                sd_sensor=self.sd_sensor,
+                                sd_distance=self.sd_distance,
+                                sd_direction=self.sd_direction,
+                                go_to_angle=go_to_angle,
+                                sleep=self.sleep)
 
             self.particles.append(particle)
 
     def resample(self):
-        return np.random.choice(self.particles, self.numParticles, replace=True, p=self.weights)
+        index = np.random.choice(np.arange(0, self.numParticles), self.numParticles, replace=True,
+                                 p=np.exp(self.weights))
+        particles = []
+        for i in index:
+            particles.append(copy.deepcopy(self.particles[i]))
+
+        return particles
 
     def move(self, turn, distance):
         if turn == 0 and distance == 0:
@@ -50,12 +63,16 @@ class ParticleFilter:
         self.estimate()
 
     def sense(self, sensor_reading):
-        i = -1
-        for particle in self.particles:
-            weight = particle.sense(sensor_reading)
-            self.weights[++i] = weight
+        def set_prev_prob(particle_, weight_):
+            particle_.prev_log_prob = weight_
+
+        for i in range(self.numParticles):
+            weight = self.particles[i].sense(sensor_reading)
+            self.weights[i] = weight
 
         self.weights -= logsumexp(self.weights)
+        np.vectorize(set_prev_prob)(self.particles, self.weights)
+
         self.particles = self.resample()
 
     def drawParticles(self):

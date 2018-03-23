@@ -5,7 +5,7 @@ import math
 
 
 class Particle:
-    def __init__(self, create, x, y, prev_prob, theta, sd_sensor, sd_distance, sd_direction, go_to_angle, sleep):
+    def __init__(self, create, x, y, prev_log_prob, theta, sd_sensor, sd_distance, sd_direction, go_to_angle, sleep):
         self.create = create
 
         # turn and move function
@@ -15,7 +15,7 @@ class Particle:
         # coordination
         self.x = x
         self.y = y
-        self.prev_prob = prev_prob
+        self.prev_log_prob = prev_log_prob
         self.theta = theta
 
         # constant
@@ -47,7 +47,9 @@ class Particle:
     def sense(self, sensor_reading):
         # calculate posterior probability for this particle
         p_robot_at_location = self.map.closest_distance((self.x, self.y), self.theta)
+        if p_robot_at_location is None or p_robot_at_location == 0:
+            return self.prev_log_prob
 
         p_z_given_robot_at_location = norm.pdf(sensor_reading, loc=p_robot_at_location, scale=self.sd_sensor)
-        return math.log(p_z_given_robot_at_location) + math.log(self.prev_prob)
+        return math.log(p_z_given_robot_at_location) + self.prev_log_prob
 

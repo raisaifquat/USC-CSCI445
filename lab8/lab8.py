@@ -72,9 +72,9 @@ class Run:
                 self.create.drive_direct(0, 0)
 
             elif b == self.virtual_create.Button.TurnLeft:
-                self.filter.move(-90, 0)
-            elif b == self.virtual_create.Button.TurnRight:
                 self.filter.move(90, 0)
+            elif b == self.virtual_create.Button.TurnRight:
+                self.filter.move(-90, 0)
             elif b == self.virtual_create.Button.Sense:
                 self.filter.sense(self.sonar.get_distance())
 
@@ -101,7 +101,7 @@ class Run:
             state = self.create.update()
             if state is not None:
                 self.odometry.update(state.leftEncoderCounts, state.rightEncoderCounts)
-                print("[{},{},{}]".format(self.odometry.x, self.odometry.y, math.degrees(self.odometry.theta)))
+                # print("[{},{},{}]".format(self.odometry.x, self.odometry.y, math.degrees(self.odometry.theta)))
             t = self.time.time()
             if start + time_in_sec <= t:
                 break
