@@ -5,18 +5,14 @@ import math
 
 
 class Particle:
-    def __init__(self, create, x, y, prev_log_prob, theta, sd_sensor, sd_distance, sd_direction, go_to_angle, sleep):
-        self.create = create
-
-        # turn and move function
-        self.go_to_angle = go_to_angle
-        self.sleep = sleep
-
+    def __init__(self, x, y, theta, prev_log_prob, sd_sensor, sd_distance, sd_direction):
         # coordination
         self.x = x
         self.y = y
-        self.prev_log_prob = prev_log_prob
         self.theta = theta
+
+        # probability the robot @ this location
+        self.prev_log_prob = prev_log_prob
 
         # constant
         self.sd_sensor = sd_sensor
@@ -37,12 +33,6 @@ class Particle:
         dist = distance + np.random.normal(0.0, self.sd_distance)
         self.x = self.x + dist * np.cos(self.theta)
         self.y = self.y - dist * np.sin(self.theta)
-
-        if turn != 0:
-            self.go_to_angle(self.theta)
-        if distance != 0:
-            self.create.drive_direct(100, 100)
-            self.sleep(dist / 100)
 
     def sense(self, sensor_reading):
         # calculate posterior probability for this particle

@@ -6,13 +6,9 @@ import copy
 
 
 class ParticleFilter:
-    def __init__(self, create, virtual_create, go_to_angle, num_particles, sleep):
-        self.create = create
+    def __init__(self, virtual_create, variance_sensor, variance_distance, variance_direction, num_particles,
+                 world_width, world_height):
         self.virtual_create = virtual_create
-
-        # odometry and turn function
-        self.go_to_angle = go_to_angle
-        self.sleep = sleep
 
         # constant
         self.variance_sensor = 0.1
@@ -35,12 +31,10 @@ class ParticleFilter:
             theta = np.random.uniform(0, 2 * np.pi)
             prev_log_prob = math.log(1 / self.numParticles)
 
-            particle = Particle(self.create, x, y, prev_log_prob, theta,
+            particle = Particle(x, y, theta, prev_log_prob,
                                 sd_sensor=self.sd_sensor,
                                 sd_distance=self.sd_distance,
-                                sd_direction=self.sd_direction,
-                                go_to_angle=go_to_angle,
-                                sleep=self.sleep)
+                                sd_direction=self.sd_direction)
 
             self.particles.append(particle)
 
