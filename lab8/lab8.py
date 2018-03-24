@@ -73,6 +73,8 @@ class Run:
         ])
 
         # This is an example on how to detect that a button was pressed in V-REP
+        turn_angle = 0
+        move_dist = 0.5
         while True:
             self.draw_particles()
 
@@ -81,32 +83,32 @@ class Run:
                 self.filter.move(0, 0.5)
 
                 # 100 mm/s = 0.1 m/s
-                self.create.drive_direct(100, 100)
-                self.sleep(0.5 / 0.1)
+                self.create.drive_direct(self.base_speed, self.base_speed)
+                self.sleep(abs(move_dist / 0.1))
 
                 # stop
                 self.create.drive_direct(0, 0)
-
             elif b == self.virtual_create.Button.TurnLeft:
-                self.filter.move(90, 0)
+                self.filter.move(math.pi / 2, 0)
 
-                self.go_to_angle(90)
-                self.create.drive_direct(0, 0)
+                # turn left by 90 degree
+                self.go_to_angle(math.pi / 2)
             elif b == self.virtual_create.Button.TurnRight:
-                self.filter.move(-90, 0)
+                self.filter.move(-math.pi / 2, 0)
 
-                self.go_to_angle(-90)
-                self.create.drive_direct(0, 0)
+                # turn right by 90 degree
+                self.go_to_angle(-math.pi / 2)
             elif b == self.virtual_create.Button.Sense:
                 self.filter.sense(self.sonar.get_distance())
 
             self.sleep(0.01)
 
     def go_to_angle(self, goal_theta):
-        while math.fabs(math.atan2(
+        while abs(math.atan2(
                 math.sin(goal_theta - self.odometry.theta),
-                math.cos(goal_theta - self.odometry.theta))) > 0.1:
-            print("Go TO: " + str(goal_theta) + " " + str(math.degrees(self.odometry.theta)))
+                math.cos(goal_theta - self.odometry.theta))
+        ) > 0.01:
+            print("Go TO: " + str(math.degrees(goal_theta)) + " " + str(math.degrees(self.odometry.theta)))
             output_theta = self.pidTheta.update(self.odometry.theta, goal_theta, self.time.time())
             self.create.drive_direct(int(+output_theta), int(-output_theta))
             self.sleep(0.01)
