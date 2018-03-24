@@ -73,8 +73,6 @@ class Run:
         ])
 
         # This is an example on how to detect that a button was pressed in V-REP
-        turn_angle = 0
-        move_dist = 0.5
         while True:
             self.draw_particles()
 
@@ -84,20 +82,26 @@ class Run:
 
                 # 100 mm/s = 0.1 m/s
                 self.create.drive_direct(self.base_speed, self.base_speed)
-                self.sleep(abs(move_dist / 0.1))
+                self.sleep(abs(0.5 / 0.1))
 
                 # stop
                 self.create.drive_direct(0, 0)
             elif b == self.virtual_create.Button.TurnLeft:
-                self.filter.move(math.pi / 2, 0)
+                turn_angle = math.pi / 2 + self.odometry.theta
+                turn_angle %= 2 * math.pi
+
+                self.filter.move(turn_angle, 0)
 
                 # turn left by 90 degree
-                self.go_to_angle(math.pi / 2)
+                self.go_to_angle(turn_angle)
             elif b == self.virtual_create.Button.TurnRight:
-                self.filter.move(-math.pi / 2, 0)
+                turn_angle = -math.pi / 2 + self.odometry.theta
+                turn_angle %= 2 * math.pi
+
+                self.filter.move(turn_angle, 0)
 
                 # turn right by 90 degree
-                self.go_to_angle(-math.pi / 2)
+                self.go_to_angle(turn_angle)
             elif b == self.virtual_create.Button.Sense:
                 self.filter.sense(self.sonar.get_distance())
 

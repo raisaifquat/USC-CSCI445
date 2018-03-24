@@ -26,8 +26,8 @@ class Particle:
         # if (distance < 0):
         #     raise ValueError('robot cannot move backwards')
 
-        # self.theta = self.theta + turn + np.random.normal(0.0, self.sd_direction)
-        self.theta = turn + np.random.normal(0.0, self.sd_direction)
+        self.theta = self.theta + turn + np.random.normal(0.0, self.sd_direction)
+        # self.theta = turn + np.random.normal(0.0, self.sd_direction)
         self.theta %= 2 * np.pi
 
         dist = distance + np.random.normal(0.0, self.sd_distance)
