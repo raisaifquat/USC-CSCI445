@@ -65,7 +65,7 @@ class Run:
 
         # This is an example on how to detect that a button was pressed in V-REP
         while True:
-            self.filter.draw_particles()
+            self.draw_particles()
             b = self.virtual_create.get_last_button()
             if b == self.virtual_create.Button.MoveForward:
                 self.filter.move(0, 0.5)
@@ -105,3 +105,13 @@ class Run:
             t = self.time.time()
             if start + time_in_sec <= t:
                 break
+
+    def draw_particles(self):
+        data = []
+
+        # get position data from all particles
+        for particle in self.filter.particles:
+            data.extend([particle.x, particle.y, 0.1, particle.theta])
+
+            # paint all particles in simulation
+            self.virtual_create.set_point_cloud(data)

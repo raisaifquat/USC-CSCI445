@@ -75,15 +75,7 @@ class ParticleFilter:
 
         self.particles = self.resample()
 
-    def draw_particles(self):
-        data = []
-
-        # get position data from all particles
-        for particle in self.particles:
-            data.extend([particle.x, particle.y, 0.1, particle.theta])
-
-            # paint all particles in simulation
-            self.virtual_create.set_point_cloud(data)
+        self.estimate()
 
     def estimate(self):
         x_avg = np.average(np.vectorize(lambda particle: particle.x)(self.particles))
