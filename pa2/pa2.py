@@ -25,8 +25,10 @@ class Run:
 
     def go_to_angle(self, angle_lower_arm, angle_upper_arm):
         # angle: < 0 to the right, > 0 to the left
-        theta1 = math.radians(90 - abs(angle_lower_arm))
-        theta2 = math.radians(abs(angle_upper_arm))
+        # theta1 = math.radians(90 - abs(angle_lower_arm))
+        # theta2 = math.radians(abs(angle_upper_arm))
+        theta1 = math.radians((-angle_lower_arm) % 180)
+        theta2 = math.radians(angle_upper_arm)
 
         self.arm.go_to(self.lower_arm_joint_number, math.radians(angle_lower_arm))
         self.arm.go_to(self.upper_arm_joint_number, math.radians(angle_upper_arm))
