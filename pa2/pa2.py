@@ -80,7 +80,7 @@ class Run:
         # self.go_to_angle(20, -180)
         # self.time.sleep(10)
         # self.go_to_angle(45, -10)
-        self.go_to_position(1, 0)
+        self.go_to_position(0, 1)
         self.time.sleep(10)
 
 
