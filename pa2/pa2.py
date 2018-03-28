@@ -25,7 +25,7 @@ class Run:
         self.y = 0.0
         self.z = 0.0
 
-    def go_to_angle(self, angle_lower_arm, angle_upper_arm):
+    def go_to_angle(self, angle_lower_arm, angle_upper_arm, is_print_info=True):
         # angle: < 0 to the right, > 0 to the left
         theta1 = math.radians(angle_lower_arm)
         theta2 = math.radians(angle_upper_arm)
@@ -39,8 +39,9 @@ class Run:
         self.x = self.L1 * math.sin(theta1) + self.L2 * math.sin(theta1 + theta2)
         self.x = -self.x
 
-        print("Go to {:.2f}, {:.2f} deg, FK: [{:.2f}, {:.2f}, {:.2f}]"
-              .format(angle_lower_arm, angle_upper_arm, self.x, self.y, self.z + self.arm_height_offset))
+        if is_print_info:
+            print("Go to {:.2f}, {:.2f} deg, FK: [{:.2f}, {:.2f}, {:.2f}]"
+                  .format(angle_lower_arm, angle_upper_arm, self.x, self.y, self.z + self.arm_height_offset))
 
     def go_to_position(self, x, y):
         goal_x = x
@@ -57,10 +58,10 @@ class Run:
         angle_lower_arm = math.degrees(theta1)
         angle_upper_arm = math.degrees(theta2)
 
-        print("Go to [{:.2f}, {:.2f}], IK: [{:.2f}, {:.2f}]"
+        print("Go to [{:.2f}, {:.2f}], IK: [{:.2f} deg, {:.2f} deg]"
               .format(x, y, angle_lower_arm, angle_upper_arm))
 
-        self.go_to_angle(angle_lower_arm, angle_upper_arm)
+        self.go_to_angle(angle_lower_arm, angle_upper_arm, is_print_info=False)
 
     def draw(self, x, y, color):
         pass
@@ -76,14 +77,14 @@ class Run:
         print("Using joint 24 (range -108 to 108 degree)")
         print("Using joint 46 (range -121 to 121 degree)")
 
-        self.go_to_angle(45, -90)
-        self.time.sleep(5)
-        self.go_to_angle(90, -70)
-        self.time.sleep(5)
-        self.go_to_angle(20, -180)
-        self.time.sleep(5)
-        self.go_to_angle(45, -10)
-        self.time.sleep(5)
+        # self.go_to_angle(45, -90)
+        # self.time.sleep(5)
+        # self.go_to_angle(90, -70)
+        # self.time.sleep(5)
+        # self.go_to_angle(20, -180)
+        # self.time.sleep(5)
+        # self.go_to_angle(45, -10)
+        # self.time.sleep(5)
 
         self.go_to_position(0.5, 0.5)
         self.time.sleep(5)
