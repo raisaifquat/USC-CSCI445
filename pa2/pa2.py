@@ -3,7 +3,10 @@ Code for PA2
 Use "run.py [--sim] pa2" to execute
 """
 import math
+import random
 import numpy as np
+from scipy.stats import norm
+from utils import clamp
 
 
 class Run:
@@ -43,7 +46,7 @@ class Run:
             print("Go to {:.2f}, {:.2f} deg, FK: [{:.2f}, {:.2f}, {:.2f}]"
                   .format(angle_lower_arm, angle_upper_arm, self.x, self.y, self.z + self.arm_height_offset))
 
-    def go_to_position(self, x, y):
+    def go_to_position(self, x, y, is_print_info=True):
         goal_x = x
         goal_y = y - self.arm_height_offset
 
@@ -58,35 +61,91 @@ class Run:
         angle_lower_arm = math.degrees(theta1)
         angle_upper_arm = math.degrees(theta2)
 
-        print("Go to [{:.2f}, {:.2f}], IK: [{:.2f} deg, {:.2f} deg]"
-              .format(x, y, angle_lower_arm, angle_upper_arm))
+        if is_print_info:
+            print("Go to [{:.2f}, {:.2f}], IK: [{:.2f} deg, {:.2f} deg]"
+                  .format(x, y, angle_lower_arm, angle_upper_arm))
 
         self.go_to_angle(angle_lower_arm, angle_upper_arm, is_print_info=False)
 
-    def draw(self, x, y, color):
-        pass
+    def draw_point(self, x, y, color=None, wait_time=3, is_print_info=False):
+        if color is None:
+            color = clamp(x, 0, 1), random.random(), clamp(y, 0, 1)
 
-    def run(self):
+        if is_print_info:
+            print("color = {}".format(color))
+
+        self.go_to_position(x, y, is_print_info=is_print_info)
+        self.arm.set_color(*color)
+        self.time.sleep(wait_time)
+
+    def draw_points(self, point_list, color=None, wait_time=2):
         self.arm.enable_painting()
 
+        for point in point_list:
+            self.draw_point(*point, color=color, wait_time=wait_time)
+
+        self.arm.disable_painting()
+
+    def draw_rectangle(self, start_x, start_y, end_x, end_y, step=0.1, color=None, wait_time=1):
+        self.arm.enable_painting()
+        draw_color = color
+
+        for y in np.arange(0, end_y - start_y, step):
+            if color is None:
+                draw_color = random.random(), random.random(), random.random()
+
+            for x in np.arange(0, end_x - start_x, step):
+                if x == 0:
+                    self.draw_point(start_x + x, start_y + y, color=draw_color)
+                else:
+                    self.draw_point(start_x + x, start_y + y, color=draw_color, wait_time=wait_time)
+
+        self.arm.disable_painting()
+
+    def draw_customized(self, wait_time=1):
+        x = np.arange(-0.7, 0.7, 0.05)
+        y = norm.pdf(x, 0, 0.7)
+        point_list = np.transpose(np.array([x, y]))
+
+        self.draw_points(point_list, wait_time=wait_time)
+
+    def run(self):
         # angle = -90
         self.arm.go_to(5, math.radians(90))
         self.arm.go_to(4, math.radians(-90))
         self.time.sleep(1)
 
+        # 2 Forward Kinematics
         print("Using joint 24 (range -108 to 108 degree)")
         print("Using joint 46 (range -121 to 121 degree)")
 
-        # self.go_to_angle(45, -90)
-        # self.time.sleep(5)
-        # self.go_to_angle(90, -70)
-        # self.time.sleep(5)
-        # self.go_to_angle(20, -180)
-        # self.time.sleep(5)
-        # self.go_to_angle(45, -10)
-        # self.time.sleep(5)
+        self.go_to_angle(45, -90)
+        self.time.sleep(3)
+        self.go_to_angle(90, -70)
+        self.time.sleep(3)
+        self.go_to_angle(20, -180)
+        self.time.sleep(3)
+        self.go_to_angle(45, -10)
+        self.time.sleep(3)
 
+        # 3 Inverse Kinematics
         self.go_to_position(0.5, 0.5)
+        self.time.sleep(3)
+        self.go_to_position(0, 1)
+        self.time.sleep(3)
+        self.go_to_position(-0.7, 0.5)
+        self.time.sleep(3)
+
+        # 4.1 rectangle attempt 1
+        # point_list = [(-0.3, 1), (0.3, 1), (0.3, 0.9), (-0.3, 0.9)]
+        # self.draw_points(point_list)
+
+        # 4.2 rectangle attempt 1
+        # self.draw_rectangle(-0.3, 0.9, 0.3, 1, step=0.05, wait_time=1)
+
+        # 4.3 customized drawing
+        self.draw_customized(wait_time=1)
+
         self.time.sleep(5)
 
 
