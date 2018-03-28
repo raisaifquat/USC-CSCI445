@@ -73,18 +73,20 @@ class Run:
         self.arm.go_to(4, math.radians(-90))
         self.time.sleep(1)
 
-        print("24: -108 to 108")
-        print("46: -121 to 121")
+        print("Using joint 24 (range -108 to 108 degree)")
+        print("Using joint 46 (range -121 to 121 degree)")
 
-        # self.go_to_angle(45, -90)
-        # self.time.sleep(10)
-        # self.go_to_angle(90, -70)
-        # self.time.sleep(10)
-        # self.go_to_angle(20, -180)
-        # self.time.sleep(10)
-        # self.go_to_angle(45, -10)
+        self.go_to_angle(45, -90)
+        self.time.sleep(5)
+        self.go_to_angle(90, -70)
+        self.time.sleep(5)
+        self.go_to_angle(20, -180)
+        self.time.sleep(5)
+        self.go_to_angle(45, -10)
+        self.time.sleep(5)
+
         self.go_to_position(0.5, 0.5)
-        self.time.sleep(10)
+        self.time.sleep(5)
 
 
 def get_dist(start_x, start_y, dest_x, dest_y):
