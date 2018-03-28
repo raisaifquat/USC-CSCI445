@@ -43,12 +43,15 @@ class Run:
               .format(angle_lower_arm, angle_upper_arm, self.x, self.y, self.z + self.arm_height_offset))
 
     def go_to_position(self, x, y):
-        r = get_dist(0, self.arm_height_offset, x, y)
+        goal_x = x
+        goal_y = y - self.arm_height_offset
+
+        r = get_dist(0, 0, goal_x, goal_y)
         alpha = math.acos((self.L1 ** 2 + self.L2 ** 2 - r ** 2) / (2 * self.L1 * self.L2))
         beta = math.acos((r ** 2 + self.L1 ** 2 - self.L2 ** 2) / (2 * self.L1 * r))
 
         theta2 = math.pi - abs(alpha)
-        theta1 = math.atan2(y, x) - abs(beta) - math.pi / 2
+        theta1 = math.atan2(goal_y, goal_x) - abs(beta) - math.pi / 2
 
         # angle: < 0 to the right, > 0 to the left
         angle_lower_arm = math.degrees(theta1)
@@ -80,7 +83,7 @@ class Run:
         # self.go_to_angle(20, -180)
         # self.time.sleep(10)
         # self.go_to_angle(45, -10)
-        self.go_to_position(0, 1)
+        self.go_to_position(0.5, 0.5)
         self.time.sleep(10)
 
 
