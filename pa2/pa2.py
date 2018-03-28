@@ -115,8 +115,16 @@ class Run:
         self.arm.go_to(4, math.radians(-90))
         self.time.sleep(1)
 
+        # get range of joint
+        # for i in range(119, 125):
+        #     # self.go_to_angle(0, -i)
+        #     # self.go_to_angle(0, i)
+        #     self.go_to_angle(-i, 180)
+        #     # self.go_to_angle(i, -180)
+        #     self.time.sleep(5)
+
         # 2 Forward Kinematics
-        print("Using joint 24 (range -108 to 108 degree)")
+        print("Using joint 24 (range -121 to 121 degree)")
         print("Using joint 46 (range -121 to 121 degree)")
 
         self.go_to_angle(45, -90)
