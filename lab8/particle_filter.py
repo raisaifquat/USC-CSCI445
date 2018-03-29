@@ -7,10 +7,12 @@ import copy
 
 class ParticleFilter:
     def __init__(self, virtual_create, variance_sensor, variance_distance, variance_direction, num_particles,
-                 world_width, world_height):
+                 world_width, world_height, n_threshold, input_map):
         self.virtual_create = virtual_create
 
         #
+        self.map = input_map
+        # estimated location of robot
         self.x = 0.0
         self.y = 0.0
         self.theta = 0.0
@@ -22,6 +24,7 @@ class ParticleFilter:
         self.sd_sensor = np.sqrt(self.variance_sensor)
         self.sd_distance = np.sqrt(self.variance_distance)
         self.sd_direction = np.sqrt(self.variance_direction)
+        self.n_threshold = n_threshold
 
         self.numParticles = num_particles
         self.world_width = world_width  # the x
@@ -39,7 +42,8 @@ class ParticleFilter:
             particle = Particle(x, y, theta, prev_log_prob,
                                 sd_sensor=self.sd_sensor,
                                 sd_distance=self.sd_distance,
-                                sd_direction=self.sd_direction)
+                                sd_direction=self.sd_direction,
+                                input_map=self.map)
 
             self.particles.append(particle)
 
@@ -69,10 +73,15 @@ class ParticleFilter:
             weight = self.particles[i].sense(sensor_reading)
             self.weights[i] = weight
 
+        # print("N = %.4f" % np.exp(logsumexp(self.weights)))
         self.weights -= logsumexp(self.weights)
+        n_effective = logsumexp(self.weights + self.weights)
+        print("Neff = %.4f" % np.exp(n_effective))
         np.vectorize(set_prev_prob)(self.particles, self.weights)
 
-        self.particles = self.resample()
+        if n_effective < self.n_threshold:
+            self.particles = self.resample()
+        # self.particles = self.resample()
 
         self.estimate()
 

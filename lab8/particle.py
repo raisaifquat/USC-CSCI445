@@ -2,10 +2,11 @@ import numpy as np
 import lab8_map
 from scipy.stats import norm
 import math
+from utils import clamp
 
 
 class Particle:
-    def __init__(self, x, y, theta, prev_log_prob, sd_sensor, sd_distance, sd_direction):
+    def __init__(self, x, y, theta, prev_log_prob, sd_sensor, sd_distance, sd_direction, input_map):
         # coordination
         self.x = x
         self.y = y
@@ -20,7 +21,7 @@ class Particle:
         self.sd_direction = sd_direction
 
         # map
-        self.map = lab8_map.Map("lab8_map.json")
+        self.map = input_map
 
     def move(self, turn, distance):
         # if (distance < 0):
@@ -31,8 +32,8 @@ class Particle:
         self.theta %= 2 * np.pi
 
         dist = distance + np.random.normal(0.0, self.sd_distance)
-        self.x = self.x + dist * np.cos(self.theta)
-        self.y = self.y - dist * np.sin(self.theta)
+        self.x = clamp(self.x + dist * np.cos(self.theta), self.map.bottom_left[0], self.map.top_right[0])
+        self.y = clamp(self.y - dist * np.sin(self.theta), self.map.bottom_left[1], self.map.top_right[1])
 
     def sense(self, sensor_reading):
         # calculate posterior probability for this particle
