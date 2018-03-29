@@ -1,9 +1,18 @@
 from pyCreate2 import create2
 import lab8_map
 import math
+import random
+from enum import Enum
+
 from particle_filter import ParticleFilter
 from odometry import Odometry
 from pid_controller import PIDController
+
+
+class Command(Enum):
+    FORWARD = 0
+    TURN_LEFT = 1
+    TURN_RIGHT = 2
 
 
 class Run:
@@ -31,38 +40,16 @@ class Run:
         self.variance_direction = 0.05
         self.world_width = 3.0  # the x
         self.world_height = 3.0  # the y
+        self.min_dist_to_wall = 0.35
+        self.travel_dist = 0.25
+        self.min_dist_to_localize = 0.2
+        self.min_theta_to_localize = math.pi / 4
 
         self.filter = ParticleFilter(self.virtual_create, self.variance_sensor, self.variance_distance,
                                      self.variance_direction, num_particles=100, world_width=self.world_width,
                                      world_height=self.world_height)
 
     def run(self):
-        # # This is an example on how to visualize the pose of our estimated position
-        # # where our estimate is that the robot is at (x,y,z)=(0.5,0.5,0.1) with heading pi
-        # self.virtual_create.set_pose((0.5, 0.5, 0.1), 0)
-        #
-        # # This is an example on how to show particles
-        # # the format is x,y,z,theta,x,y,z,theta,...
-        # data = [0.5, 0.5, 0.1, math.pi/2, 1.5, 1, 0.1, 0]
-        # self.virtual_create.set_point_cloud(data)
-        #
-        # # This is an example on how to estimate the distance to a wall for the given
-        # # map, assuming the robot is at (0, 0) and has heading math.pi
-        # print(self.map.closest_distance((0.5,0.5), 0))
-        #
-        # # This is an example on how to detect that a button was pressed in V-REP
-        # while True:
-        #     b = self.virtual_create.get_last_button()
-        #     if b == self.virtual_create.Button.MoveForward:
-        #         print("Forward pressed!")
-        #     elif b == self.virtual_create.Button.TurnLeft:
-        #         print("Turn Left pressed!")
-        #     elif b == self.virtual_create.Button.TurnRight:
-        #         print("Turn Right pressed!")
-        #     elif b == self.virtual_create.Button.Sense:
-        #         print("Sense pressed!")
-        #
-        #     self.time.sleep(0.01)
         self.create.start()
         self.create.safe()
 
@@ -72,12 +59,19 @@ class Run:
             create2.Sensor.RightEncoderCounts,
         ])
 
+        isLocalized = False
+
         # This is an example on how to detect that a button was pressed in V-REP
-        while True:
+        while not isLocalized:
             self.draw_particles()
 
-            b = self.virtual_create.get_last_button()
-            if b == self.virtual_create.Button.MoveForward:
+            # generate random num
+            command = random.choice([c for c in Command])
+
+            if command is Command.FORWARD:
+                if self.sonar.get_distance() < self.min_dist_to_wall:
+                    continue
+
                 self.filter.move(0, 0.5)
 
                 # 100 mm/s = 0.1 m/s
@@ -86,7 +80,7 @@ class Run:
 
                 # stop
                 self.create.drive_direct(0, 0)
-            elif b == self.virtual_create.Button.TurnLeft:
+            elif command is Command.TURN_LEFT:
                 turn_angle = math.pi / 2 + self.odometry.theta
                 turn_angle %= 2 * math.pi
 
@@ -94,7 +88,7 @@ class Run:
 
                 # turn left by 90 degree
                 self.go_to_angle(turn_angle)
-            elif b == self.virtual_create.Button.TurnRight:
+            elif command is Command.TURN_RIGHT:
                 turn_angle = -math.pi / 2 + self.odometry.theta
                 turn_angle %= 2 * math.pi
 
@@ -102,17 +96,24 @@ class Run:
 
                 # turn right by 90 degree
                 self.go_to_angle(turn_angle)
-            elif b == self.virtual_create.Button.Sense:
-                self.filter.sense(self.sonar.get_distance())
 
-            self.sleep(0.01)
+            self.filter.sense(self.sonar.get_distance())
+
+            # check if localized
+
+            # distance between odometry and estimated positions
+            dist_position_to_goal = math.sqrt(
+                (self.odometry.x ** 2 - self.filter.x ** 2) + (self.odometry.y ** 2 - self.filter.y ** 2))
+            diff_theta_to_goal = abs(self.odometry.theta - self.filter.theta)
+
+            isLocalized = dist_position_to_goal < self.min_dist_to_localize and diff_theta_to_goal < self.min_theta_to_localize
 
     def go_to_angle(self, goal_theta):
         while abs(math.atan2(
                 math.sin(goal_theta - self.odometry.theta),
                 math.cos(goal_theta - self.odometry.theta))
         ) > 0.01:
-            print("Go TO: " + str(math.degrees(goal_theta)) + " " + str(math.degrees(self.odometry.theta)))
+            # print("Go TO: " + str(math.degrees(goal_theta)) + " " + str(math.degrees(self.odometry.theta)))
             output_theta = self.pidTheta.update(self.odometry.theta, goal_theta, self.time.time())
             self.create.drive_direct(int(+output_theta), int(-output_theta))
             self.sleep(0.01)
@@ -125,6 +126,7 @@ class Run:
             time_in_sec (float): time to sleep in seconds
         """
         start = self.time.time()
+
         while True:
             state = self.create.update()
             if state is not None:

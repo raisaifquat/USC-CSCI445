@@ -10,17 +10,22 @@ class ParticleFilter:
                  world_width, world_height):
         self.virtual_create = virtual_create
 
+        #
+        self.x = 0.0
+        self.y = 0.0
+        self.theta = 0.0
+
         # constant
-        self.variance_sensor = 0.1
-        self.variance_distance = 0.01
-        self.variance_direction = 0.05
+        self.variance_sensor = variance_sensor
+        self.variance_distance = variance_distance
+        self.variance_direction = variance_direction
         self.sd_sensor = np.sqrt(self.variance_sensor)
         self.sd_distance = np.sqrt(self.variance_distance)
         self.sd_direction = np.sqrt(self.variance_direction)
 
         self.numParticles = num_particles
-        self.world_width = 3.0  # the x
-        self.world_height = 3.0  # the y
+        self.world_width = world_width  # the x
+        self.world_height = world_height  # the y
 
         self.weights = np.empty([self.numParticles, ])
         self.particles = []
@@ -76,6 +81,10 @@ class ParticleFilter:
 
         y_avg = np.average(np.vectorize(lambda particle: particle.y)(self.particles))
         theta_avg = np.average(np.vectorize(lambda particle: particle.theta)(self.particles))
+
+        self.x = x_avg
+        self.y = y_avg
+        self.theta = theta_avg
 
         # draw the estimated position and all other particles
         self.virtual_create.set_pose((x_avg, y_avg, 0.1), theta_avg)
