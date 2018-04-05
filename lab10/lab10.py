@@ -53,7 +53,7 @@ class Run:
         self.pidDistance = pid_controller.PIDController(1000, 0, 50, [0, 0], [-200, 200], is_angle=False)
 
     def backtrack_to_start(self, node, color):
-        # path = []
+        path = []
         while node is not None:
             # path.append(node.loc)
             print(node.loc)
@@ -62,7 +62,7 @@ class Run:
                 self.map.draw_line(node.loc, node.parent.loc, color)
             node = node.parent
 
-    # return path
+        return path
 
     def follow_path(self, path):
         self.create.start()
@@ -165,8 +165,7 @@ class Run:
 
         found_goal = False
 
-        nodes = []
-
+        nodes = list()
         nodes.append(start_point)
         # rand_loc_list = []
         count = 0
@@ -222,12 +221,14 @@ class Run:
         if found_goal:
             print("Goal loc: (%s,%s)" % goal_point.loc)
             self.backtrack_to_start(goal_point, (0, 255, 0))
-            # path = self.backtrack_to_start(goal_point, (0,255,0))
-            # path.reverse()
-            # print(path)
-            # self.follow_path(path)
+
+            path = self.backtrack_to_start(goal_point, (0, 255, 0))
+
             self.map.save("lab10_rrt.png")
+
+            path.reverse()
+            print(path)
+            self.follow_path(path)
 
         else:
             print("Error -- exhausted nodes before completion...")
-
