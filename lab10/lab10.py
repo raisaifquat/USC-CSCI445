@@ -55,7 +55,7 @@ class Run:
     def backtrack_to_start(self, node, color):
         path = []
         while node is not None:
-            # path.append(node.loc)
+            path.append(node.loc)
             print(node.loc)
             if node.parent is not None:
                 print("test")
@@ -68,6 +68,10 @@ class Run:
         self.create.start()
         self.create.safe()
 
+        self.odometry.x = 2.7
+        self.odometry.y = 0.33
+        self.odometry.theta = math.pi / 2
+
         # request sensors
         self.create.start_stream([
             create2.Sensor.LeftEncoderCounts,
@@ -76,24 +80,17 @@ class Run:
 
         waypoints = [[n[0] / 100, n[1] / 100] for n in path]
         waypoints.pop(0)
-        # waypoints = [
-        #     [2.0, 0.0],
-        #     [3.0, 2.0],
-        #     [2.5, 2.0],
-        #     [0.0, 1.5],
-        #     [0.0, 0.0]
-        # ]
 
-        # goal_x = 0.5
-        # goal_y = -0.5
-        base_speed = 500
+        base_speed = 100
         start_time = self.time.time()
 
         # with open('output.csv', 'w') as f:
         for waypoint in waypoints:
-            print("Going to: (%s, %s)" % (waypoint[0], waypoint[1]))
             goal_x = waypoint[0]
-            goal_y = waypoint[1]
+            goal_y = 3.1 - waypoint[1]
+            # goal_x = 3.25 - waypoint[1]
+            # goal_y = waypoint[0] - 3.0
+            print("Going to: (%s, %s)" % (goal_x, goal_y))
 
             while True:
                 state = self.create.update()
@@ -104,10 +101,10 @@ class Run:
                     # self.odometry.theta = 1.57
 
                     self.odometry.update(state.leftEncoderCounts, state.rightEncoderCounts)
-                    goal_theta = math.atan2(waypoint[1] - self.odometry.y, waypoint[0] - self.odometry.x)
+                    goal_theta = math.atan2(goal_y - self.odometry.y, goal_x - self.odometry.x)
                     theta = math.atan2(math.sin(self.odometry.theta), math.cos(self.odometry.theta))
                     # f.write("{},{},{}\n".format(self.time.time() - start_time, theta, goal_theta))
-                    print("[{},{},{}]".format(self.odometry.x, self.odometry.y, math.degrees(self.odometry.theta)))
+                    # print("[{},{},{}]".format(self.odometry.x, self.odometry.y, math.degrees(self.odometry.theta)))
 
                     output_theta = self.pidTheta.update(self.odometry.theta, goal_theta, self.time.time())
 
@@ -116,7 +113,7 @@ class Run:
 
                     # improved version 1: stop if close enough to goal
                     distance = math.sqrt(
-                        math.pow(waypoint[0] - self.odometry.x, 2) + math.pow(waypoint[1] - self.odometry.y, 2))
+                        math.pow(goal_x - self.odometry.x, 2) + math.pow(goal_y - self.odometry.y, 2))
                     if distance < 0.1:
                         break
 
@@ -226,9 +223,9 @@ class Run:
 
             self.map.save("lab10_rrt.png")
 
-            # path.reverse()
+            path.reverse()
             print(path)
-            # self.follow_path(path)
+            self.follow_path(path)
 
         else:
             print("Error -- exhausted nodes before completion...")
