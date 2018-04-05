@@ -226,9 +226,9 @@ class Run:
 
             self.map.save("lab10_rrt.png")
 
-            path.reverse()
+            # path.reverse()
             print(path)
-            self.follow_path(path)
+            # self.follow_path(path)
 
         else:
             print("Error -- exhausted nodes before completion...")
